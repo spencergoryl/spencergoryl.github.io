@@ -21,14 +21,14 @@ document.fonts.ready.then(() => {
 
     textCtx.fillStyle = "white";
 
-    const fontSize = Math.min(canvas.width * 0.18, 180);
+    const fontSize = Math.min(canvas.width * 0.1, 100);
 
     textCtx.font = `700 ${fontSize}px "Averia Serif Libre"`;
     textCtx.textAlign = "center";
     textCtx.textBaseline = "middle";
 
     textCtx.fillText(
-        "ENGRAM",
+        "Engram",
         canvas.width / 2,
         canvas.height / 2
     );
