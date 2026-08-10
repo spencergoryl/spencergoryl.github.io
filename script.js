@@ -22,7 +22,11 @@ textCanvas.width = canvas.width;
 textCanvas.height = canvas.height;
 
 textCtx.fillStyle = "white";
-textCtx.font = "700 100px "Averia Serif Libre";
+
+const fontSize = Math.min(canvas.width * 0.18, 180);
+
+textCtx.font = `700 ${100}px "Averia Serif Libre"`;
+
 textCtx.textAlign = "center";
 textCtx.textBaseline = "middle";
 
