@@ -20,7 +20,7 @@ textCanvas.width = canvas.width;
 textCanvas.height = canvas.height;
 
 textCtx.fillStyle = "white";
-textCtx.font = "bold 180px Arial";
+textCtx.font = "700 100px "Averia Serif Libre";
 textCtx.textAlign = "center";
 textCtx.textBaseline = "middle";
 
