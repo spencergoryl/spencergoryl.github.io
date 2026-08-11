@@ -10,7 +10,17 @@ document.fonts.ready.then(() => {
     const particleCount = 1200;
 
     // --------------------------------
-    // Create an invisible version of ENGRAM
+    // Animation settings
+    // --------------------------------
+
+    let textOpacity = 0;
+    let particleOpacity = 1;
+
+    let transitionStarted = false;
+    let transitionProgress = 0;
+
+    // --------------------------------
+    // Create invisible version of ENGRAM
     // --------------------------------
 
     const textCanvas = document.createElement("canvas");
@@ -19,22 +29,22 @@ document.fonts.ready.then(() => {
     textCanvas.width = canvas.width;
     textCanvas.height = canvas.height;
 
-    textCtx.fillStyle = "white";
-
-    const fontSize = Math.min(canvas.width * 0.1, 100);
+    const fontSize = Math.min(canvas.width * 0.18, 180);
 
     textCtx.font = `700 ${fontSize}px "Averia Serif Libre"`;
     textCtx.textAlign = "center";
     textCtx.textBaseline = "middle";
 
+    textCtx.fillStyle = "white";
+
     textCtx.fillText(
-        "Engram",
+        "ENGRAM",
         canvas.width / 2,
         canvas.height / 2
     );
 
     // --------------------------------
-    // Find the pixels that make up the word
+    // Find the pixels that make up ENGRAM
     // --------------------------------
 
     const imageData = textCtx.getImageData(
@@ -86,6 +96,54 @@ document.fonts.ready.then(() => {
     }
 
     // --------------------------------
+    // Check how close particles are
+    // --------------------------------
+
+    function particlesHaveConverged() {
+
+        let totalDistance = 0;
+
+        particles.forEach(particle => {
+
+            const dx = particle.targetX - particle.x;
+            const dy = particle.targetY - particle.y;
+
+            totalDistance += Math.sqrt(dx * dx + dy * dy);
+
+        });
+
+        const averageDistance =
+            totalDistance / particles.length;
+
+        return averageDistance < 8;
+    }
+
+    // --------------------------------
+    // Draw the real ENGRAM
+    // --------------------------------
+
+    function drawRealText() {
+
+        ctx.save();
+
+        ctx.globalAlpha = textOpacity;
+
+        ctx.font = `700 ${fontSize}px "Averia Serif Libre"`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        ctx.fillStyle = "white";
+
+        ctx.fillText(
+            "ENGRAM",
+            canvas.width / 2,
+            canvas.height / 2
+        );
+
+        ctx.restore();
+    }
+
+    // --------------------------------
     // Animate
     // --------------------------------
 
@@ -98,7 +156,9 @@ document.fonts.ready.then(() => {
             canvas.height
         );
 
-        ctx.fillStyle = "white";
+        // --------------------------------
+        // Move particles toward ENGRAM
+        // --------------------------------
 
         particles.forEach(particle => {
 
@@ -107,6 +167,53 @@ document.fonts.ready.then(() => {
 
             particle.y +=
                 (particle.targetY - particle.y) * 0.01;
+
+        });
+
+        // --------------------------------
+        // Detect when ENGRAM has formed
+        // --------------------------------
+
+        if (
+            !transitionStarted &&
+            particlesHaveConverged()
+        ) {
+
+            transitionStarted = true;
+
+        }
+
+        // --------------------------------
+        // Begin particle → typography transition
+        // --------------------------------
+
+        if (transitionStarted) {
+
+            transitionProgress += 0.012;
+
+            textOpacity = Math.min(
+                transitionProgress,
+                1
+            );
+
+            particleOpacity =
+                Math.max(
+                    1 - transitionProgress,
+                    0
+                );
+
+        }
+
+        // --------------------------------
+        // Draw particles
+        // --------------------------------
+
+        ctx.save();
+
+        ctx.globalAlpha = particleOpacity;
+        ctx.fillStyle = "white";
+
+        particles.forEach(particle => {
 
             ctx.beginPath();
 
@@ -121,6 +228,14 @@ document.fonts.ready.then(() => {
             ctx.fill();
 
         });
+
+        ctx.restore();
+
+        // --------------------------------
+        // Draw real typography
+        // --------------------------------
+
+        drawRealText();
 
         requestAnimationFrame(animate);
     }
