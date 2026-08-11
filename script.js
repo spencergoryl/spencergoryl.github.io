@@ -9,17 +9,26 @@ document.fonts.ready.then(() => {
     const particles = [];
     const particleCount = 1200;
 
+     // --------------------------------
+    // Animation Controls
+    // --------------------------------
+
+    const MELT_SPEED = 0.012;
+    const FONT_APPEAR_POINT = 0.92;
+    const FINAL_SETTLE_TIME = 200;
+    const MAX_FONT_SIZE = 100;
+
     // --------------------------------
     // Typography
     // --------------------------------
 
     const fontSize = Math.min(
-        canvas.width * 0.12,
-        120
+        canvas.width * 0.1,
+        MAX_FONT_SIZE
     );
 
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
+    const centerX = Math.round(canvas.width / 2);
+const centerY = Math.round(canvas.height / 2);
 
     const font = `700 ${fontSize}px "Averia Serif Libre"`;
 
@@ -204,12 +213,12 @@ document.fonts.ready.then(() => {
 
         if (phase === "melting") {
 
-            meltProgress += 0.015;
+            meltProgress += MELT_SPEED;
 
-            if (meltProgress >= 1) {
+            if (meltProgress >= FONT_APPEAR_POINT) {
 
-                meltProgress = 1;
-                phase = "complete";
+    meltProgress = FONT_APPEAR_POINT;
+    phase = "complete";
 
             }
         }
