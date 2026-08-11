@@ -14,10 +14,10 @@ document.fonts.ready.then(() => {
     // --------------------------------
 
     const MELT_SPEED = 0.012;
-    const FONT_APPEAR_POINT = 0.8;
+    const FONT_APPEAR_POINT = 0.7;
 
     const FONT_START_SCALE = 1.04;
-    const FONT_SETTLE_SPEED = 0.04;
+    const FONT_SETTLE_SPEED = 0.1;
 
     const MAX_FONT_SIZE = 100;
 
@@ -52,7 +52,7 @@ document.fonts.ready.then(() => {
     textCtx.fillStyle = "white";
 
     textCtx.fillText(
-        "ENGRAM",
+        "Engram",
         centerX,
         centerY
     );
@@ -352,7 +352,7 @@ document.fonts.ready.then(() => {
             ctx.fillStyle = "white";
 
             ctx.fillText(
-                "ENGRAM",
+                "Engram",
                 0,
                 0
             );
