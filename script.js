@@ -14,9 +14,12 @@ document.fonts.ready.then(() => {
     // --------------------------------
 
     const MELT_SPEED = 0.012;
-    const FONT_APPEAR_POINT = 1;
-    const FINAL_SETTLE_TIME = 400;
-    const MAX_FONT_SIZE = 100;
+const FONT_APPEAR_POINT = 0.97;
+
+const FONT_START_SCALE = 1.08;
+const FONT_SETTLE_SPEED = 0.04;
+
+const MAX_FONT_SIZE = 100;
 
     // --------------------------------
     // Typography
@@ -121,6 +124,7 @@ const centerY = Math.round(canvas.height / 2);
 
     let holdTimer = 0;
     let meltProgress = 0;
+    let fontSettleProgress = 0;
 
     // --------------------------------
     // Easing
@@ -218,11 +222,25 @@ const centerY = Math.round(canvas.height / 2);
             if (meltProgress >= FONT_APPEAR_POINT) {
 
     meltProgress = FONT_APPEAR_POINT;
-    phase = "complete";
-
+    phase = "resolving";
             }
         }
+        // --------------------------------
+// Font resolution
+// --------------------------------
 
+if (phase === "resolving") {
+
+    fontSettleProgress += FONT_SETTLE_SPEED;
+
+    if (fontSettleProgress >= 1) {
+
+        fontSettleProgress = 1;
+        phase = "complete";
+
+    }
+
+}
         // --------------------------------
         // Determine particle size
         // --------------------------------
@@ -235,6 +253,30 @@ const centerY = Math.round(canvas.height / 2);
                 easeInOut(meltProgress);
 
         }
+        
+        // --------------------------------
+// Calculate font scale
+// --------------------------------
+
+let fontScale = 0;
+
+if (phase === "resolving") {
+
+    const easedSettle =
+        easeOut(fontSettleProgress);
+
+    fontScale =
+        FONT_START_SCALE -
+        (FONT_START_SCALE - 1) *
+        easedSettle;
+
+}
+
+if (phase === "complete") {
+
+    fontScale = 1;
+
+}
 
         // --------------------------------
         // Draw particles
@@ -284,25 +326,38 @@ const centerY = Math.round(canvas.height / 2);
         // Final crisp typography
         // --------------------------------
 
-        if (phase === "complete") {
+        if (
+    phase === "resolving" ||
+    phase === "complete"
+) {
 
-            ctx.font = font;
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
+    ctx.save();
 
-            ctx.fillStyle = "white";
+    ctx.translate(
+        centerX,
+        centerY
+    );
 
-            ctx.fillText(
-                "ENGRAM",
-                centerX,
-                centerY
-            );
+    ctx.scale(
+        fontScale,
+        fontScale
+    );
 
-        }
+    ctx.font = font;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
 
-        requestAnimationFrame(animate);
+    ctx.fillStyle = "white";
 
-    }
+    ctx.fillText(
+        "ENGRAM",
+        0,
+        0
+    );
+
+    ctx.restore();
+
+}
 
     animate();
 
