@@ -16,10 +16,10 @@ document.fonts.ready.then(() => {
     const MELT_SPEED = 0.012;
     const FONT_APPEAR_POINT = 0.7;
 
-    const FONT_START_SCALE = 1.03;
-    const FONT_SETTLE_SPEED = 0.1;
+    const FONT_START_SCALE = 1.02;
+    const FONT_SETTLE_SPEED = 0.08;
 
-    const PARTICLE_CONTRACT_SPEED = 0.02;
+    const PARTICLE_CONTRACT_SPEED = 0.08;
 
     const MAX_FONT_SIZE = 100;
 
