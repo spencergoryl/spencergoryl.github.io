@@ -14,10 +14,10 @@ document.fonts.ready.then(() => {
     // --------------------------------
 
     const MELT_SPEED = 0.012;
-    const FONT_APPEAR_POINT = 0.47;
+    const FONT_APPEAR_POINT = 0.87;
 
-    const FONT_START_SCALE = 1.04;
-    const FONT_SETTLE_SPEED = 0.18;
+    const FONT_START_SCALE = 1.06;
+    const FONT_SETTLE_SPEED = 0.12;
 
     const MAX_FONT_SIZE = 100;
 
