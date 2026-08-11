@@ -17,7 +17,7 @@ document.fonts.ready.then(() => {
     const FONT_APPEAR_POINT = 0.7;
 
     const FONT_START_SCALE = 1.015;
-    const FONT_SETTLE_SPEED = 0.02;
+    const FONT_SETTLE_SPEED = 0.002;
 
     const PARTICLE_CONTRACT_SPEED = 0.08;
 
