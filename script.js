@@ -9,17 +9,17 @@ document.fonts.ready.then(() => {
     const particles = [];
     const particleCount = 1200;
 
-     // --------------------------------
+    // --------------------------------
     // Animation Controls
     // --------------------------------
 
     const MELT_SPEED = 0.012;
-const FONT_APPEAR_POINT = 0.97;
+    const FONT_APPEAR_POINT = 0.97;
 
-const FONT_START_SCALE = 1.08;
-const FONT_SETTLE_SPEED = 0.04;
+    const FONT_START_SCALE = 1.08;
+    const FONT_SETTLE_SPEED = 0.04;
 
-const MAX_FONT_SIZE = 100;
+    const MAX_FONT_SIZE = 100;
 
     // --------------------------------
     // Typography
@@ -31,7 +31,7 @@ const MAX_FONT_SIZE = 100;
     );
 
     const centerX = Math.round(canvas.width / 2);
-const centerY = Math.round(canvas.height / 2);
+    const centerY = Math.round(canvas.height / 2);
 
     const font = `700 ${fontSize}px "Averia Serif Libre"`;
 
@@ -105,11 +105,8 @@ const centerY = Math.round(canvas.height / 2);
             targetX: target.x,
             targetY: target.y,
 
-            // Starting particle size
             size: Math.random() * 2 + 0.5,
 
-            // Slight variation prevents
-            // every particle behaving identically
             sizeVariation:
                 Math.random() * 0.8 + 0.6
 
@@ -135,6 +132,12 @@ const centerY = Math.round(canvas.height / 2);
         return t < 0.5
             ? 2 * t * t
             : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
+    }
+
+    function easeOut(t) {
+
+        return 1 - Math.pow(1 - t, 3);
 
     }
 
@@ -221,26 +224,28 @@ const centerY = Math.round(canvas.height / 2);
 
             if (meltProgress >= FONT_APPEAR_POINT) {
 
-    meltProgress = FONT_APPEAR_POINT;
-    phase = "resolving";
+                meltProgress = FONT_APPEAR_POINT;
+                phase = "resolving";
+
             }
         }
+
         // --------------------------------
-// Font resolution
-// --------------------------------
+        // Font resolution
+        // --------------------------------
 
-if (phase === "resolving") {
+        if (phase === "resolving") {
 
-    fontSettleProgress += FONT_SETTLE_SPEED;
+            fontSettleProgress += FONT_SETTLE_SPEED;
 
-    if (fontSettleProgress >= 1) {
+            if (fontSettleProgress >= 1) {
 
-        fontSettleProgress = 1;
-        phase = "complete";
+                fontSettleProgress = 1;
+                phase = "complete";
 
-    }
+            }
+        }
 
-}
         // --------------------------------
         // Determine particle size
         // --------------------------------
@@ -253,30 +258,30 @@ if (phase === "resolving") {
                 easeInOut(meltProgress);
 
         }
-        
+
         // --------------------------------
-// Calculate font scale
-// --------------------------------
+        // Calculate font scale
+        // --------------------------------
 
-let fontScale = 0;
+        let fontScale = 0;
 
-if (phase === "resolving") {
+        if (phase === "resolving") {
 
-    const easedSettle =
-        easeOut(fontSettleProgress);
+            const easedSettle =
+                easeOut(fontSettleProgress);
 
-    fontScale =
-        FONT_START_SCALE -
-        (FONT_START_SCALE - 1) *
-        easedSettle;
+            fontScale =
+                FONT_START_SCALE -
+                (FONT_START_SCALE - 1) *
+                easedSettle;
 
-}
+        }
 
-if (phase === "complete") {
+        if (phase === "complete") {
 
-    fontScale = 1;
+            fontScale = 1;
 
-}
+        }
 
         // --------------------------------
         // Draw particles
@@ -290,13 +295,6 @@ if (phase === "complete") {
 
                 const normalSize =
                     particle.size;
-
-                /*
-                 * Particles begin small.
-                 *
-                 * During the melt they expand
-                 * until they overlap.
-                 */
 
                 const expandedSize =
                     5.5 * particle.sizeVariation;
@@ -323,41 +321,45 @@ if (phase === "complete") {
         }
 
         // --------------------------------
-        // Final crisp typography
+        // Draw final typography
         // --------------------------------
 
         if (
-    phase === "resolving" ||
-    phase === "complete"
-) {
+            phase === "resolving" ||
+            phase === "complete"
+        ) {
 
-    ctx.save();
+            ctx.save();
 
-    ctx.translate(
-        centerX,
-        centerY
-    );
+            ctx.translate(
+                centerX,
+                centerY
+            );
 
-    ctx.scale(
-        fontScale,
-        fontScale
-    );
+            ctx.scale(
+                fontScale,
+                fontScale
+            );
 
-    ctx.font = font;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
+            ctx.font = font;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
 
-    ctx.fillStyle = "white";
+            ctx.fillStyle = "white";
 
-    ctx.fillText(
-        "ENGRAM",
-        0,
-        0
-    );
+            ctx.fillText(
+                "ENGRAM",
+                0,
+                0
+            );
 
-    ctx.restore();
+            ctx.restore();
 
-}
+        }
+
+        requestAnimationFrame(animate);
+
+    }
 
     animate();
 
