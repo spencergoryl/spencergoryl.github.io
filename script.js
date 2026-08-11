@@ -21,8 +21,11 @@ document.fonts.ready.then(() => {
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
 
+    const font = `700 ${fontSize}px "Averia Serif Libre"`;
+
     // --------------------------------
-    // Create text canvas
+    // Create invisible text canvas
+    // Used only to find particle targets
     // --------------------------------
 
     const textCanvas = document.createElement("canvas");
@@ -31,7 +34,7 @@ document.fonts.ready.then(() => {
     textCanvas.width = canvas.width;
     textCanvas.height = canvas.height;
 
-    textCtx.font = `700 ${fontSize}px "Averia Serif Libre"`;
+    textCtx.font = font;
     textCtx.textAlign = "center";
     textCtx.textBaseline = "middle";
     textCtx.fillStyle = "white";
@@ -43,7 +46,7 @@ document.fonts.ready.then(() => {
     );
 
     // --------------------------------
-    // Find text pixels
+    // Find pixels that make up ENGRAM
     // --------------------------------
 
     const imageData = textCtx.getImageData(
@@ -90,7 +93,11 @@ document.fonts.ready.then(() => {
             targetX: target.x,
             targetY: target.y,
 
-            size: Math.random() * 2 + 0.5
+            size: Math.random() * 2 + 0.5,
+
+            // Tiny movement used during settling
+            driftX: Math.random() * Math.PI * 2,
+            driftY: Math.random() * Math.PI * 2
 
         });
     }
@@ -100,9 +107,106 @@ document.fonts.ready.then(() => {
     // --------------------------------
 
     let phase = "forming";
-    let textOpacity = 0;
-    let particleOpacity = 1;
+
     let holdTimer = 0;
+    let resolutionProgress = 0;
+
+    // --------------------------------
+    // Easing functions
+    // --------------------------------
+
+    function easeInOut(t) {
+
+        return t < 0.5
+            ? 2 * t * t
+            : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
+    }
+
+    function easeOut(t) {
+
+        return 1 - Math.pow(1 - t, 3);
+
+    }
+
+    // --------------------------------
+    // Draw final typography
+    // --------------------------------
+
+    function drawFinalText(opacity) {
+
+        if (opacity <= 0) {
+            return;
+        }
+
+        ctx.save();
+
+        ctx.globalAlpha = opacity;
+
+        ctx.font = font;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        ctx.fillStyle = "white";
+
+        ctx.fillText(
+            "ENGRAM",
+            centerX,
+            centerY
+        );
+
+        ctx.restore();
+    }
+
+    // --------------------------------
+    // Draw particles
+    // --------------------------------
+
+    function drawParticles(opacity, settlingAmount) {
+
+        if (opacity <= 0) {
+            return;
+        }
+
+        ctx.save();
+
+        ctx.globalAlpha = opacity;
+        ctx.fillStyle = "white";
+
+        particles.forEach(particle => {
+
+            const driftAmount =
+                settlingAmount * 0.7;
+
+            const driftX =
+                Math.sin(
+                    particle.driftX +
+                    performance.now() * 0.001
+                ) * driftAmount;
+
+            const driftY =
+                Math.cos(
+                    particle.driftY +
+                    performance.now() * 0.001
+                ) * driftAmount;
+
+            ctx.beginPath();
+
+            ctx.arc(
+                particle.x + driftX,
+                particle.y + driftY,
+                particle.size,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fill();
+
+        });
+
+        ctx.restore();
+
+    }
 
     // --------------------------------
     // Animation
@@ -117,7 +221,10 @@ document.fonts.ready.then(() => {
             canvas.height
         );
 
-        // Move particles
+        // --------------------------------
+        // Move particles toward targets
+        // --------------------------------
+
         particles.forEach(particle => {
 
             particle.x +=
@@ -129,7 +236,7 @@ document.fonts.ready.then(() => {
         });
 
         // --------------------------------
-        // Detect when word has formed
+        // Formation phase
         // --------------------------------
 
         if (phase === "forming") {
@@ -160,14 +267,14 @@ document.fonts.ready.then(() => {
         }
 
         // --------------------------------
-        // Hold particle ENGRAM briefly
+        // Recognition pause
         // --------------------------------
 
         if (phase === "holding") {
 
             holdTimer++;
 
-            if (holdTimer > 35) {
+            if (holdTimer > 40) {
 
                 phase = "resolving";
 
@@ -175,79 +282,82 @@ document.fonts.ready.then(() => {
         }
 
         // --------------------------------
-        // Resolve into typography
+        // Resolution phase
         // --------------------------------
 
         if (phase === "resolving") {
 
-            textOpacity += 0.025;
-            particleOpacity -= 0.025;
+            resolutionProgress += 0.012;
 
-            if (textOpacity >= 1) {
+            if (resolutionProgress >= 1) {
 
-                textOpacity = 1;
-                particleOpacity = 0;
-
+                resolutionProgress = 1;
                 phase = "complete";
 
             }
         }
 
         // --------------------------------
-        // Draw particles
+        // Calculate transition values
         // --------------------------------
 
-        if (particleOpacity > 0) {
+        let particleOpacity = 1;
+        let textOpacity = 0;
+        let settlingAmount = 0;
 
-            ctx.save();
+        if (phase === "holding") {
 
-            ctx.globalAlpha =
-                particleOpacity;
+            settlingAmount = 1;
 
-            ctx.fillStyle = "white";
+        }
 
-            particles.forEach(particle => {
+        if (phase === "resolving") {
 
-                ctx.beginPath();
+            const eased =
+                easeInOut(resolutionProgress);
 
-                ctx.arc(
-                    particle.x,
-                    particle.y,
-                    particle.size,
-                    0,
-                    Math.PI * 2
+            // Text appears slightly before
+            // particles completely disappear.
+
+            textOpacity =
+                easeOut(
+                    Math.min(
+                        resolutionProgress / 0.75,
+                        1
+                    )
                 );
 
-                ctx.fill();
+            particleOpacity =
+                1 - eased;
 
-            });
+            settlingAmount =
+                1 - eased;
 
-            ctx.restore();
+        }
+
+        if (phase === "complete") {
+
+            particleOpacity = 0;
+            textOpacity = 1;
+            settlingAmount = 0;
 
         }
 
         // --------------------------------
-        // Draw final ENGRAM
+        // Draw
         // --------------------------------
 
-        if (textOpacity > 0) {
+        drawParticles(
+            particleOpacity,
+            settlingAmount
+        );
 
-            ctx.save();
-
-            ctx.globalAlpha =
-                textOpacity;
-
-            ctx.drawImage(
-                textCanvas,
-                0,
-                0
-            );
-
-            ctx.restore();
-
-        }
+        drawFinalText(
+            textOpacity
+        );
 
         requestAnimationFrame(animate);
+
     }
 
     animate();
