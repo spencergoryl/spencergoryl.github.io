@@ -39,8 +39,8 @@ document.fonts.ready.then(() => {
 
     textCtx.fillText(
         "Engram",
-        canvas.width / 2,
-        canvas.height / 2
+        canvas.width / 1,
+        canvas.height / 1
     );
 
     // --------------------------------
@@ -136,8 +136,8 @@ document.fonts.ready.then(() => {
 
         ctx.fillText(
             "Engram",
-            canvas.width / 2,
-            canvas.height / 2
+            canvas.width / 1,
+            canvas.height / 1
         );
 
         ctx.restore();
