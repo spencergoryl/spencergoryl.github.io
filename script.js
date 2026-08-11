@@ -19,7 +19,7 @@ document.fonts.ready.then(() => {
     const FONT_START_SCALE = 1.03;
     const FONT_SETTLE_SPEED = 0.1;
 
-    const PARTICLE_CONTRACT_SPEED = 0.06;
+    const PARTICLE_CONTRACT_SPEED = 0.02;
 
     const MAX_FONT_SIZE = 100;
 
