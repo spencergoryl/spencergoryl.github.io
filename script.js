@@ -17,7 +17,7 @@ document.fonts.ready.then(() => {
     const FONT_APPEAR_POINT = 0.8;
 
     const FONT_START_SCALE = 1.04;
-    const FONT_SETTLE_SPEED = 0.4;
+    const FONT_SETTLE_SPEED = 0.04;
 
     const MAX_FONT_SIZE = 100;
 
