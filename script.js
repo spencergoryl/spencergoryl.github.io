@@ -14,7 +14,7 @@ document.fonts.ready.then(() => {
     // --------------------------------
 
     const MELT_SPEED = 0.012;
-    const FONT_APPEAR_POINT = 0.92;
+    const FONT_APPEAR_POINT = 0.12;
     const FINAL_SETTLE_TIME = 200;
     const MAX_FONT_SIZE = 100;
 
