@@ -16,8 +16,8 @@ document.fonts.ready.then(() => {
     const MELT_SPEED = 0.012;
     const FONT_APPEAR_POINT = 0.7;
 
-    const FONT_START_SCALE = 1.02;
-    const FONT_SETTLE_SPEED = 0.08;
+    const FONT_START_SCALE = 1.015;
+    const FONT_SETTLE_SPEED = 0.06;
 
     const PARTICLE_CONTRACT_SPEED = 0.08;
 
