@@ -287,11 +287,15 @@ document.fonts.ready.then(() => {
         // Draw particles
         // --------------------------------
 
-        if (phase !== "complete") {
+        if (
+    phase === "forming" ||
+    phase === "holding" ||
+    phase === "melting"
+) {
 
-            ctx.fillStyle = "white";
+    ctx.fillStyle = "white";
 
-            particles.forEach(particle => {
+    particles.forEach(particle => {
 
                 const normalSize =
                     particle.size;
