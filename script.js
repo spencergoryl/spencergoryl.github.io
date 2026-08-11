@@ -10,17 +10,19 @@ document.fonts.ready.then(() => {
     const particleCount = 1200;
 
     // --------------------------------
-    // Animation settings
+    // Typography settings
     // --------------------------------
 
-    let textOpacity = 0;
-    let particleOpacity = 1;
+    const fontSize = Math.min(
+        canvas.width * 0.12,
+        120
+    );
 
-    let transitionStarted = false;
-    let transitionProgress = 0;
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
 
     // --------------------------------
-    // Create invisible version of ENGRAM
+    // Create text canvas
     // --------------------------------
 
     const textCanvas = document.createElement("canvas");
@@ -29,22 +31,19 @@ document.fonts.ready.then(() => {
     textCanvas.width = canvas.width;
     textCanvas.height = canvas.height;
 
-    const fontSize = Math.min(canvas.width * 0.1, 100);
-
     textCtx.font = `700 ${fontSize}px "Averia Serif Libre"`;
     textCtx.textAlign = "center";
     textCtx.textBaseline = "middle";
-
     textCtx.fillStyle = "white";
 
     textCtx.fillText(
-        "Engram",
-        canvas.width / 1,
-        canvas.height / 1
+        "ENGRAM",
+        centerX,
+        centerY
     );
 
     // --------------------------------
-    // Find the pixels that make up ENGRAM
+    // Find text pixels
     // --------------------------------
 
     const imageData = textCtx.getImageData(
@@ -60,14 +59,14 @@ document.fonts.ready.then(() => {
 
         for (let x = 0; x < canvas.width; x += 5) {
 
-            const index = (y * canvas.width + x) * 4;
-            const alpha = imageData.data[index + 3];
+            const index =
+                (y * canvas.width + x) * 4;
 
-            if (alpha > 128) {
+            if (imageData.data[index + 3] > 128) {
 
                 pixels.push({
-                    x: x,
-                    y: y
+                    x,
+                    y
                 });
 
             }
@@ -80,7 +79,8 @@ document.fonts.ready.then(() => {
 
     for (let i = 0; i < particleCount; i++) {
 
-        const target = pixels[i % pixels.length];
+        const target =
+            pixels[i % pixels.length];
 
         particles.push({
 
@@ -96,55 +96,16 @@ document.fonts.ready.then(() => {
     }
 
     // --------------------------------
-    // Check how close particles are
+    // Animation state
     // --------------------------------
 
-    function particlesHaveConverged() {
-
-        let totalDistance = 0;
-
-        particles.forEach(particle => {
-
-            const dx = particle.targetX - particle.x;
-            const dy = particle.targetY - particle.y;
-
-            totalDistance += Math.sqrt(dx * dx + dy * dy);
-
-        });
-
-        const averageDistance =
-            totalDistance / particles.length;
-
-        return averageDistance < 8;
-    }
+    let phase = "forming";
+    let textOpacity = 0;
+    let particleOpacity = 1;
+    let holdTimer = 0;
 
     // --------------------------------
-    // Draw the real ENGRAM
-    // --------------------------------
-
-    function drawRealText() {
-
-        ctx.save();
-
-        ctx.globalAlpha = textOpacity;
-
-        ctx.font = `700 ${fontSize}px "Averia Serif Libre"`;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-
-        ctx.fillStyle = "white";
-
-        ctx.fillText(
-            "Engram",
-            canvas.width / 1,
-            canvas.height / 1
-        );
-
-        ctx.restore();
-    }
-
-    // --------------------------------
-    // Animate
+    // Animation
     // --------------------------------
 
     function animate() {
@@ -156,10 +117,7 @@ document.fonts.ready.then(() => {
             canvas.height
         );
 
-        // --------------------------------
-        // Move particles toward ENGRAM
-        // --------------------------------
-
+        // Move particles
         particles.forEach(particle => {
 
             particle.x +=
@@ -171,71 +129,123 @@ document.fonts.ready.then(() => {
         });
 
         // --------------------------------
-        // Detect when ENGRAM has formed
+        // Detect when word has formed
         // --------------------------------
 
-        if (
-            !transitionStarted &&
-            particlesHaveConverged()
-        ) {
+        if (phase === "forming") {
 
-            transitionStarted = true;
+            let totalDistance = 0;
 
+            particles.forEach(particle => {
+
+                const dx =
+                    particle.targetX - particle.x;
+
+                const dy =
+                    particle.targetY - particle.y;
+
+                totalDistance +=
+                    Math.sqrt(dx * dx + dy * dy);
+
+            });
+
+            const averageDistance =
+                totalDistance / particles.length;
+
+            if (averageDistance < 12) {
+
+                phase = "holding";
+
+            }
         }
 
         // --------------------------------
-        // Begin particle → typography transition
+        // Hold particle ENGRAM briefly
         // --------------------------------
 
-        if (transitionStarted) {
+        if (phase === "holding") {
 
-            transitionProgress += 0.012;
+            holdTimer++;
 
-            textOpacity = Math.min(
-                transitionProgress,
-                1
-            );
+            if (holdTimer > 35) {
 
-            particleOpacity =
-                Math.max(
-                    1 - transitionProgress,
-                    0
-                );
+                phase = "resolving";
 
+            }
+        }
+
+        // --------------------------------
+        // Resolve into typography
+        // --------------------------------
+
+        if (phase === "resolving") {
+
+            textOpacity += 0.025;
+            particleOpacity -= 0.025;
+
+            if (textOpacity >= 1) {
+
+                textOpacity = 1;
+                particleOpacity = 0;
+
+                phase = "complete";
+
+            }
         }
 
         // --------------------------------
         // Draw particles
         // --------------------------------
 
-        ctx.save();
+        if (particleOpacity > 0) {
 
-        ctx.globalAlpha = particleOpacity;
-        ctx.fillStyle = "white";
+            ctx.save();
 
-        particles.forEach(particle => {
+            ctx.globalAlpha =
+                particleOpacity;
 
-            ctx.beginPath();
+            ctx.fillStyle = "white";
 
-            ctx.arc(
-                particle.x,
-                particle.y,
-                particle.size,
+            particles.forEach(particle => {
+
+                ctx.beginPath();
+
+                ctx.arc(
+                    particle.x,
+                    particle.y,
+                    particle.size,
+                    0,
+                    Math.PI * 2
+                );
+
+                ctx.fill();
+
+            });
+
+            ctx.restore();
+
+        }
+
+        // --------------------------------
+        // Draw final ENGRAM
+        // --------------------------------
+
+        if (textOpacity > 0) {
+
+            ctx.save();
+
+            ctx.globalAlpha =
+                textOpacity;
+
+            ctx.drawImage(
+                textCanvas,
                 0,
-                Math.PI * 2
+                0
             );
 
-            ctx.fill();
+            ctx.restore();
 
-        });
-
-        ctx.restore();
-
-        // --------------------------------
-        // Draw real typography
-        // --------------------------------
-
-        drawRealText();
+        }
 
         requestAnimationFrame(animate);
     }
