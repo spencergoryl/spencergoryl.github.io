@@ -19,6 +19,8 @@ document.fonts.ready.then(() => {
     const FONT_START_SCALE = 1.03;
     const FONT_SETTLE_SPEED = 0.1;
 
+    const PARTICLE_CONTRACT_SPEED = 0.06;
+
     const MAX_FONT_SIZE = 100;
 
     // --------------------------------
@@ -120,8 +122,9 @@ document.fonts.ready.then(() => {
     let phase = "forming";
 
     let holdTimer = 0;
-    let meltProgress = 0;
-    let fontSettleProgress = 0;
+let meltProgress = 0;
+let fontSettleProgress = 0;
+let particleContractProgress = 0;
 
     // --------------------------------
     // Easing
@@ -236,15 +239,23 @@ document.fonts.ready.then(() => {
 
         if (phase === "resolving") {
 
-            fontSettleProgress += FONT_SETTLE_SPEED;
+    fontSettleProgress += FONT_SETTLE_SPEED;
+    particleContractProgress += PARTICLE_CONTRACT_SPEED;
 
-            if (fontSettleProgress >= 1) {
+    if (fontSettleProgress >= 1) {
 
-                fontSettleProgress = 1;
-                phase = "complete";
+        fontSettleProgress = 1;
 
-            }
-        }
+    }
+
+    if (particleContractProgress >= 1) {
+
+        particleContractProgress = 1;
+        phase = "complete";
+
+    }
+
+}
 
         // --------------------------------
         // Determine particle size
@@ -301,12 +312,32 @@ document.fonts.ready.then(() => {
                     particle.size;
 
                 const expandedSize =
-                    5.5 * particle.sizeVariation;
+    5.5 * particle.sizeVariation;
 
-                const size =
-                    normalSize +
-                    (expandedSize - normalSize)
-                    * expansion;
+let size =
+    normalSize +
+    (expandedSize - normalSize)
+    * expansion;
+
+// --------------------------------
+// Particle contraction
+// --------------------------------
+
+if (phase === "resolving") {
+
+    const contract =
+        easeInOut(particleContractProgress);
+
+    const minimumSize = 0.2;
+
+size =
+    expandedSize *
+    (
+        minimumSize +
+        (1 - minimumSize) *
+        (1 - contract)
+    );
+}
 
                 ctx.beginPath();
 
