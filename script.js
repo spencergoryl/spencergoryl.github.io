@@ -1,6 +1,9 @@
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
+const navigation =
+    document.getElementById("art-navigation");
+
 document.fonts.ready.then(() => {
 
     // --------------------------------
@@ -388,7 +391,11 @@ document.fonts.ready.then(() => {
 
         if (phase === "complete") {
 
-            fontScale = 1;
+    fontScale = 1;
+
+    navigation.classList.add("visible");
+
+}
 
         }
 
