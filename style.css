@@ -174,7 +174,7 @@ canvas {
 
 .art-item:hover .art-button {
 
-    opacity: .8;
+    opacity: .9;
 
     background:
         rgba(255, 255, 255, 0.10);
