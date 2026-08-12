@@ -37,7 +37,7 @@ document.fonts.ready.then(() => {
 
     const FONT_APPEAR_POINT = 0.80;
 
-    const FONT_START_SCALE = 1.2;
+    const FONT_START_SCALE = 1;
 
     const FONT_SETTLE_DURATION = 1000;
 
