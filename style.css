@@ -145,7 +145,7 @@ canvas {
 
     border: 1px solid transparent;
 
-    border-radius: 3px;
+    border-radius: 6px;
 
     background:
         rgba(255, 255, 255, 0);
@@ -174,7 +174,7 @@ canvas {
 
 .art-item:hover .art-button {
 
-    opacity: 1;
+    opacity: .5;
 
     background:
         rgba(255, 255, 255, 0.10);
@@ -182,9 +182,9 @@ canvas {
     border-color:
         rgba(255, 255, 255, 0.15);
 
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(4px);
 
-    -webkit-backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(4px);
 }
 
 
@@ -194,7 +194,7 @@ canvas {
 
 .art-item:hover .art-title {
 
-    opacity: 0.65;
+    opacity: 0.4;
 
 }
 
