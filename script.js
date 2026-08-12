@@ -3,23 +3,42 @@ const ctx = canvas.getContext("2d");
 
 document.fonts.ready.then(() => {
 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    // --------------------------------
+    // Canvas setup
+    // --------------------------------
 
-    const particles = [];
-    const particleCount = 1200;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
     // --------------------------------
     // Animation Controls
     // --------------------------------
 
-    const MELT_SPEED = 0.012;
-    const FONT_APPEAR_POINT = 0.6;
+    const PARTICLE_COUNT = 1200;
+
+    const FOLLOW_SPEED = 0.65;
+
+    const HOLD_TIME = 750;
+
+    const MELT_DURATION = 900;
+
+    const FONT_APPEAR_POINT = 0.60;
 
     const FONT_START_SCALE = 1.04;
-    const FONT_SETTLE_SPEED = 0.02;
 
-    const PARTICLE_CONTRACT_SPEED = 0.1;
+    const FONT_SETTLE_DURATION = 500;
+
+    const PARTICLE_CONTRACT_DURATION = 450;
 
     const MAX_FONT_SIZE = 100;
 
@@ -28,25 +47,27 @@ document.fonts.ready.then(() => {
     // --------------------------------
 
     const fontSize = Math.min(
-        canvas.width * 0.1,
+        width * 0.1,
         MAX_FONT_SIZE
     );
 
-    const centerX = Math.round(canvas.width / 2);
-    const centerY = Math.round(canvas.height / 2);
+    const centerX = Math.round(width / 2);
+    const centerY = Math.round(height / 2);
 
-    const font = `700 ${fontSize}px "Averia Serif Libre"`;
+    const font =
+        `700 ${fontSize}px "Averia Serif Libre"`;
 
     // --------------------------------
-    // Invisible text canvas
-    // Used only to find particle targets
+    // Create text mask
     // --------------------------------
 
     const textCanvas = document.createElement("canvas");
     const textCtx = textCanvas.getContext("2d");
 
-    textCanvas.width = canvas.width;
-    textCanvas.height = canvas.height;
+    textCanvas.width = width * dpr;
+    textCanvas.height = height * dpr;
+
+    textCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
     textCtx.font = font;
     textCtx.textAlign = "center";
@@ -60,30 +81,45 @@ document.fonts.ready.then(() => {
     );
 
     // --------------------------------
-    // Find pixels belonging to ENGRAM
+    // Find text pixels
     // --------------------------------
 
     const imageData = textCtx.getImageData(
         0,
         0,
-        canvas.width,
-        canvas.height
+        textCanvas.width,
+        textCanvas.height
     );
 
     const pixels = [];
 
-    for (let y = 0; y < canvas.height; y += 5) {
+    const sampleSize = Math.max(
+        1,
+        Math.round(5 * dpr)
+    );
 
-        for (let x = 0; x < canvas.width; x += 5) {
+    for (
+        let y = 0;
+        y < textCanvas.height;
+        y += sampleSize
+    ) {
+
+        for (
+            let x = 0;
+            x < textCanvas.width;
+            x += sampleSize
+        ) {
 
             const index =
-                (y * canvas.width + x) * 4;
+                (y * textCanvas.width + x) * 4;
 
             if (imageData.data[index + 3] > 128) {
 
                 pixels.push({
-                    x: x,
-                    y: y
+
+                    x: x / dpr,
+                    y: y / dpr
+
                 });
 
             }
@@ -94,20 +130,27 @@ document.fonts.ready.then(() => {
     // Create particles
     // --------------------------------
 
-    for (let i = 0; i < particleCount; i++) {
+    const particles = [];
+
+    for (
+        let i = 0;
+        i < PARTICLE_COUNT;
+        i++
+    ) {
 
         const target =
             pixels[i % pixels.length];
 
         particles.push({
 
-            x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height,
+            x: Math.random() * width,
+            y: Math.random() * height,
 
             targetX: target.x,
             targetY: target.y,
 
-            size: Math.random() * 2 + 0.5,
+            size:
+                Math.random() * 2 + 0.5,
 
             sizeVariation:
                 Math.random() * 0.8 + 0.6
@@ -121,10 +164,13 @@ document.fonts.ready.then(() => {
 
     let phase = "forming";
 
-    let holdTimer = 0;
-let meltProgress = 0;
-let fontSettleProgress = 0;
-let particleContractProgress = 0;
+    let phaseTime = 0;
+
+    let meltProgress = 0;
+    let fontSettleProgress = 0;
+    let particleContractProgress = 0;
+
+    let lastTime = performance.now();
 
     // --------------------------------
     // Easing
@@ -148,71 +194,157 @@ let particleContractProgress = 0;
     // Animation
     // --------------------------------
 
-    function animate() {
+    function animate(currentTime) {
+
+        const deltaTime =
+            Math.min(
+                currentTime - lastTime,
+                32
+            );
+
+        lastTime = currentTime;
+
+        // Convert milliseconds to seconds
+
+        const dt = deltaTime / 1000;
+
+        // --------------------------------
+        // Clear canvas
+        // --------------------------------
 
         ctx.clearRect(
             0,
             0,
-            canvas.width,
-            canvas.height
+            width,
+            height
         );
 
         // --------------------------------
         // Move particles toward targets
         // --------------------------------
 
-        particles.forEach(particle => {
+        if (
+            phase === "forming" ||
+            phase === "holding" ||
+            phase === "melting"
+        ) {
 
-            particle.x +=
-                (particle.targetX - particle.x) * 0.01;
+            const followAmount =
+                1 - Math.exp(
+                    -FOLLOW_SPEED * 60 * dt
+                );
 
-            particle.y +=
-                (particle.targetY - particle.y) * 0.01;
+            let totalDistanceSquared = 0;
 
-        });
+            for (let i = 0; i < particles.length; i++) {
 
-        // --------------------------------
-        // Detect completed formation
-        // --------------------------------
-
-        if (phase === "forming") {
-
-            let totalDistance = 0;
-
-            particles.forEach(particle => {
+                const particle = particles[i];
 
                 const dx =
-                    particle.targetX - particle.x;
+                    particle.targetX -
+                    particle.x;
 
                 const dy =
-                    particle.targetY - particle.y;
+                    particle.targetY -
+                    particle.y;
 
-                totalDistance +=
-                    Math.sqrt(dx * dx + dy * dy);
+                particle.x +=
+                    dx * followAmount;
 
-            });
+                particle.y +=
+                    dy * followAmount;
 
-            const averageDistance =
-                totalDistance / particles.length;
+                totalDistanceSquared +=
+                    dx * dx +
+                    dy * dy;
+            }
 
-            if (averageDistance < 12) {
+            // --------------------------------
+            // Detect completed formation
+            // --------------------------------
 
-                phase = "holding";
+            if (phase === "forming") {
+
+                const averageDistanceSquared =
+                    totalDistanceSquared /
+                    particles.length;
+
+                if (
+                    averageDistanceSquared <
+                    12 * 12
+                ) {
+
+                    phase = "holding";
+                    phaseTime = 0;
+
+                }
+            }
+        }
+
+        // --------------------------------
+        // Hold dotted ENGRAM
+        // --------------------------------
+
+        if (phase === "holding") {
+
+            phaseTime += deltaTime;
+
+            if (phaseTime >= HOLD_TIME) {
+
+                phase = "melting";
+                phaseTime = 0;
 
             }
         }
 
         // --------------------------------
-        // Hold the dotted ENGRAM
+        // Melt particles
         // --------------------------------
 
-        if (phase === "holding") {
+        if (phase === "melting") {
 
-            holdTimer++;
+            meltProgress +=
+                deltaTime / MELT_DURATION;
 
-            if (holdTimer > 45) {
+            if (meltProgress >= FONT_APPEAR_POINT) {
 
-                phase = "melting";
+                meltProgress =
+                    FONT_APPEAR_POINT;
+
+                phase = "resolving";
+                phaseTime = 0;
+
+            }
+        }
+
+        // --------------------------------
+        // Resolve font and particles
+        // --------------------------------
+
+        if (phase === "resolving") {
+
+            phaseTime += deltaTime;
+
+            fontSettleProgress =
+                Math.min(
+                    phaseTime /
+                    FONT_SETTLE_DURATION,
+                    1
+                );
+
+            particleContractProgress =
+                Math.min(
+                    phaseTime /
+                    PARTICLE_CONTRACT_DURATION,
+                    1
+                );
+
+            if (
+                fontSettleProgress >= 1 &&
+                particleContractProgress >= 1
+            ) {
+
+                phase = "complete";
 
             }
         }
@@ -221,70 +353,36 @@ let particleContractProgress = 0;
         // Particle expansion
         // --------------------------------
 
-        if (phase === "melting") {
-
-            meltProgress += MELT_SPEED;
-
-            if (meltProgress >= FONT_APPEAR_POINT) {
-
-                meltProgress = FONT_APPEAR_POINT;
-                phase = "resolving";
-
-            }
-        }
-
-        // --------------------------------
-        // Font resolution
-        // --------------------------------
-
-        if (phase === "resolving") {
-
-    fontSettleProgress += FONT_SETTLE_SPEED;
-    particleContractProgress += PARTICLE_CONTRACT_SPEED;
-
-    if (fontSettleProgress >= 1) {
-
-        fontSettleProgress = 1;
-
-    }
-
-    if (particleContractProgress >= 1) {
-
-        particleContractProgress = 1;
-        phase = "complete";
-
-    }
-
-}
-
-        // --------------------------------
-        // Determine particle size
-        // --------------------------------
-
         let expansion = 0;
 
         if (phase === "melting") {
 
             expansion =
-                easeInOut(meltProgress);
+                easeInOut(
+                    meltProgress /
+                    FONT_APPEAR_POINT
+                );
 
         }
 
         // --------------------------------
-        // Calculate font scale
+        // Font scale
         // --------------------------------
 
         let fontScale = 0;
 
         if (phase === "resolving") {
 
-            const easedSettle =
-                easeOut(fontSettleProgress);
+            const eased =
+                easeOut(
+                    fontSettleProgress
+                );
 
             fontScale =
                 FONT_START_SCALE -
-                (FONT_START_SCALE - 1) *
-                easedSettle;
+                (
+                    FONT_START_SCALE - 1
+                ) * eased;
 
         }
 
@@ -299,45 +397,78 @@ let particleContractProgress = 0;
         // --------------------------------
 
         if (
-    phase === "forming" ||
-    phase === "holding" ||
-    phase === "melting"
-) {
+            phase === "forming" ||
+            phase === "holding" ||
+            phase === "melting" ||
+            phase === "resolving"
+        ) {
 
-    ctx.fillStyle = "white";
+            ctx.fillStyle = "white";
 
-    particles.forEach(particle => {
+            for (
+                let i = 0;
+                i < particles.length;
+                i++
+            ) {
+
+                const particle =
+                    particles[i];
 
                 const normalSize =
                     particle.size;
 
                 const expandedSize =
-    5.5 * particle.sizeVariation;
+                    5.5 *
+                    particle.sizeVariation;
 
-let size =
-    normalSize +
-    (expandedSize - normalSize)
-    * expansion;
+                let size;
 
-// --------------------------------
-// Particle contraction
-// --------------------------------
+                // --------------------------------
+                // Normal particle → expanded
+                // --------------------------------
 
-if (phase === "resolving") {
+                if (
+                    phase === "forming" ||
+                    phase === "holding"
+                ) {
 
-    const contract =
-        easeInOut(particleContractProgress);
+                    size = normalSize;
 
-    const minimumSize = 0.2;
+                } else if (
+                    phase === "melting"
+                ) {
 
-size =
-    expandedSize *
-    (
-        minimumSize +
-        (1 - minimumSize) *
-        (1 - contract)
-    );
-}
+                    size =
+                        normalSize +
+                        (
+                            expandedSize -
+                            normalSize
+                        ) * expansion;
+
+                } else {
+
+                    // --------------------------------
+                    // Contract particles
+                    // --------------------------------
+
+                    const contract =
+                        easeInOut(
+                            particleContractProgress
+                        );
+
+                    const minimumSize = 0.15;
+
+                    size =
+                        expandedSize *
+                        (
+                            minimumSize +
+                            (
+                                1 -
+                                minimumSize
+                            ) *
+                            (1 - contract)
+                        );
+                }
 
                 ctx.beginPath();
 
@@ -351,12 +482,11 @@ size =
 
                 ctx.fill();
 
-            });
-
+            }
         }
 
         // --------------------------------
-        // Draw final typography
+        // Draw crisp typography
         // --------------------------------
 
         if (
@@ -396,6 +526,6 @@ size =
 
     }
 
-    animate();
+    requestAnimationFrame(animate);
 
 });
