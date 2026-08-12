@@ -26,19 +26,19 @@ document.fonts.ready.then(() => {
 
     const PARTICLE_COUNT = 1200;
 
-    const FOLLOW_SPEED = 0.65;
+    const FOLLOW_SPEED = 0.15;
 
-    const HOLD_TIME = 750;
+    const HOLD_TIME = 1500;
 
     const MELT_DURATION = 900;
 
-    const FONT_APPEAR_POINT = 0.60;
+    const FONT_APPEAR_POINT = 0.80;
 
-    const FONT_START_SCALE = 1.04;
+    const FONT_START_SCALE = 1.02;
 
-    const FONT_SETTLE_DURATION = 500;
+    const FONT_SETTLE_DURATION = 1000;
 
-    const PARTICLE_CONTRACT_DURATION = 450;
+    const PARTICLE_CONTRACT_DURATION = 900;
 
     const MAX_FONT_SIZE = 100;
 
