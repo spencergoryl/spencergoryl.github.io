@@ -26,7 +26,6 @@ canvas {
     transform: translateX(-50%);
 
     display: flex;
-
     align-items: center;
     justify-content: center;
 
@@ -34,19 +33,14 @@ canvas {
 
     width: max-content;
 
-    opacity: 0;
-
     pointer-events: none;
-
-    transition:
-        opacity 1.2s ease;
 
     z-index: 10;
 }
 
 
 /* --------------------------------
-   Individual artwork item
+   Artwork item
 -------------------------------- */
 
 .art-item {
@@ -54,12 +48,57 @@ canvas {
     position: relative;
 
     display: flex;
-
     align-items: center;
     justify-content: center;
 
     white-space: nowrap;
 
+    opacity: 0;
+
+    transform: translateY(6px);
+
+    transition:
+        opacity 1s ease,
+        transform 1s ease;
+}
+
+
+/* --------------------------------
+   Reveal navigation
+-------------------------------- */
+
+#art-navigation.visible {
+
+    pointer-events: auto;
+
+}
+
+
+/* --------------------------------
+   Staggered appearance
+-------------------------------- */
+
+#art-navigation.visible .art-item {
+
+    opacity: 1;
+
+    transform: translateY(0);
+}
+
+#art-navigation.visible .art-item:nth-child(1) {
+    transition-delay: 0s;
+}
+
+#art-navigation.visible .art-item:nth-child(2) {
+    transition-delay: 0.12s;
+}
+
+#art-navigation.visible .art-item:nth-child(3) {
+    transition-delay: 0.24s;
+}
+
+#art-navigation.visible .art-item:nth-child(4) {
+    transition-delay: 0.36s;
 }
 
 
@@ -88,13 +127,12 @@ canvas {
     z-index: 1;
 
     transition:
-        opacity 0.25s ease;
-
+        opacity 0.3s ease;
 }
 
 
 /* --------------------------------
-   Invisible button layer
+   Glass button
 -------------------------------- */
 
 .art-button {
@@ -109,7 +147,8 @@ canvas {
 
     border-radius: 3px;
 
-    background: rgba(255, 255, 255, 0);
+    background:
+        rgba(255, 255, 255, 0);
 
     backdrop-filter: blur(0);
 
@@ -124,14 +163,13 @@ canvas {
     transition:
         opacity 0.3s ease,
         background 0.3s ease,
-        backdrop-filter 0.3s ease,
-        border-color 0.3s ease;
-
+        border-color 0.3s ease,
+        backdrop-filter 0.3s ease;
 }
 
 
 /* --------------------------------
-   Hover state
+   Hover
 -------------------------------- */
 
 .art-item:hover .art-button {
@@ -147,23 +185,16 @@ canvas {
     backdrop-filter: blur(8px);
 
     -webkit-backdrop-filter: blur(8px);
-
 }
 
 
 /* --------------------------------
-   Fade title slightly beneath glass
+   Text beneath glass
 -------------------------------- */
 
 .art-item:hover .art-title {
 
     opacity: 0.65;
-
-    #art-navigation.visible {
-
-    opacity: 1;
-
-    pointer-events: auto;
 
 }
 
