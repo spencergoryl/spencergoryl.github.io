@@ -389,15 +389,17 @@ document.fonts.ready.then(() => {
 
         }
 
-        if (phase === "complete") {
+ if (phase === "complete") {
 
     fontScale = 1;
 
-    navigation.classList.add("visible");
+    if (!navigation.classList.contains("visible")) {
+
+        navigation.classList.add("visible");
+
+    }
 
 }
-
-        }
 
         // --------------------------------
         // Draw particles
