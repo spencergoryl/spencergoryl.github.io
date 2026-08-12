@@ -159,4 +159,12 @@ canvas {
 
     opacity: 0.65;
 
+    #art-navigation.visible {
+
+    opacity: 1;
+
+    pointer-events: auto;
+
+}
+
 }
