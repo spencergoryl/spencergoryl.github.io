@@ -26,7 +26,7 @@ document.fonts.ready.then(() => {
 
     const PARTICLE_COUNT = 1200;
 
-    const FOLLOW_SPEED = 0.01;
+    const FOLLOW_SPEED = 0.001;
 
     const HOLD_TIME = 1500;
 
