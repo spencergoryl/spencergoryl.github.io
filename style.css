@@ -127,10 +127,10 @@ canvas {
     z-index: 1;
 
     /* Slightly unresolved initial state */
-    filter: blur(1.8px);
+    filter: blur(2px);
 
     transform:
-        skewX(0.8deg)
+        skewX(1.6deg)
         translateX(1px);
 
     transition:
