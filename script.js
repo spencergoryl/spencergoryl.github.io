@@ -538,3 +538,53 @@ document.fonts.ready.then(() => {
     requestAnimationFrame(animate);
 
 });
+
+// --------------------------------
+// Mobile navigation interaction
+// --------------------------------
+
+const artItems =
+    document.querySelectorAll(".art-item");
+
+const isMobile =
+    window.matchMedia("(hover: none)").matches;
+
+if (isMobile) {
+
+    artItems.forEach(item => {
+
+        const button =
+            item.querySelector(".art-button");
+
+        button.addEventListener("click", event => {
+
+            if (!item.classList.contains("focused")) {
+
+                event.preventDefault();
+
+                // Remove focus from other titles
+                artItems.forEach(otherItem => {
+
+                    if (otherItem !== item) {
+
+                        otherItem.classList.remove("focused");
+
+                    }
+
+                });
+
+                // First tap focuses this title
+                item.classList.add("focused");
+
+            } else {
+
+                // Second tap will open artwork
+                // We will add this later
+
+            }
+
+        });
+
+    });
+
+}
