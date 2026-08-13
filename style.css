@@ -177,6 +177,20 @@ canvas {
 }
 
 /* --------------------------------
+   Focused navigation item
+-------------------------------- */
+
+.art-item.focused .art-title {
+
+    filter: blur(0);
+
+    transform:
+        skewX(0)
+        translateX(0);
+
+}
+
+/* --------------------------------
    Text beneath glass
 -------------------------------- */
 
@@ -186,4 +200,57 @@ canvas {
 
 }
 
+/* --------------------------------
+   Mobile Navigation
+-------------------------------- */
+
+@media (max-width: 700px) {
+
+    #art-navigation {
+
+        bottom: 9%;
+
+        width: 90vw;
+
+        display: grid;
+
+        grid-template-columns:
+            1fr 1fr;
+
+        column-gap: 28px;
+
+        row-gap: 22px;
+
+        justify-items: center;
+
+        align-items: center;
+
+    }
+
+
+    .art-item {
+
+        width: 100%;
+
+        justify-content: center;
+
+    }
+
+
+    .art-title {
+
+        font-size: 14px;
+
+        letter-spacing: 0.03em;
+
+    }
+
+
+    .art-button {
+
+        inset: -12px -10px;
+
+    }
+
+}
 }
