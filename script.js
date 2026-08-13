@@ -1,6 +1,33 @@
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
+const artworkPaths = {
+
+    "solar-steam":
+        "images/solar-steam.jpg",
+
+    "cloud-break":
+        "images/cloud-break.jpg",
+
+    "clinical-perception":
+        "images/clinical-perception.jpg",
+
+    "idle-thought":
+        "images/idle-thought.jpg"
+
+};
+// --------------------------------
+// Preload artwork
+// --------------------------------
+
+Object.values(artworkPaths).forEach(path => {
+
+    const image = new Image();
+
+    image.src = path;
+
+});
+
 const navigation =
     document.getElementById("art-navigation");
 
@@ -578,13 +605,106 @@ if (isMobile) {
 
             } else {
 
-                // Second tap will open artwork
-                // We will add this later
+                // Second tap opens artwork
 
+const artName =
+    button.dataset.art;
+
+const imagePath =
+    artworkPaths[artName];
+
+if (!imagePath) return;
+
+viewerImage.src = imagePath;
+
+viewerImage.alt = artName
+    .replace(/-/g, " ");
+
+artViewer.classList.add("open");
+
+document.body.style.overflow = "hidden";
             }
 
         });
 
     });
+    // --------------------------------
+// Artwork Viewer
+// --------------------------------
+
+const artViewer =
+    document.getElementById("art-viewer");
+
+const viewerImage =
+    document.getElementById("viewer-image");
+
+const viewerClose =
+    document.getElementById("viewer-close");
+
+const artButtons =
+    document.querySelectorAll(".art-button");
+
+
+artButtons.forEach(button => {
+
+    button.addEventListener("click", event => {
+
+        const artName =
+            button.dataset.art;
+
+        const imagePath =
+            artworkPaths[artName];
+
+        if (!imagePath) return;
+
+        viewerImage.src = imagePath;
+
+        viewerImage.alt = artName
+            .replace(/-/g, " ");
+
+        artViewer.classList.add("open");
+
+        document.body.style.overflow = "hidden";
+
+    });
+
+});
+    // --------------------------------
+// Close viewer
+// --------------------------------
+
+function closeViewer() {
+
+    artViewer.classList.remove("open");
+
+    document.body.style.overflow = "";
+
+    viewerImage.src = "";
+
+}
+
+
+viewerClose.addEventListener(
+    "click",
+    closeViewer
+);
+    // --------------------------------
+// Keyboard Escape
+// --------------------------------
+    document.addEventListener(
+    "keydown",
+    event => {
+
+        if (
+            event.key === "Escape" &&
+            artViewer.classList.contains("open")
+        ) {
+
+            closeViewer();
+
+        }
+
+    }
+);
 
 }
