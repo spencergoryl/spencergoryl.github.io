@@ -126,8 +126,16 @@ canvas {
 
     z-index: 1;
 
+    /* Slightly unresolved initial state */
+    filter: blur(1.5px);
+
+    transform:
+        skewX(0.8deg)
+        translateX(1px);
+
     transition:
-        opacity 0.3s ease;
+        filter 0.5s ease,
+        transform 0.5s ease;
 }
 
 
@@ -139,54 +147,34 @@ canvas {
 
     position: absolute;
 
-    inset: -10px -16px;
+    inset: -12px -18px;
 
     padding: 0;
 
-    border: 1px solid transparent;
+    border: none;
 
-    border-radius: 6px;
-
-    background:
-        rgba(255, 255, 255, 0);
-
-    backdrop-filter: blur(0);
-
-    -webkit-backdrop-filter: blur(0);
+    background: transparent;
 
     cursor: pointer;
 
     z-index: 2;
 
-    opacity: 0;
-
-    transition:
-        opacity 0.3s ease,
-        background 0.3s ease,
-        border-color 0.3s ease,
-        backdrop-filter 0.3s ease;
+    opacity: 1;
 }
-
 
 /* --------------------------------
    Hover
 -------------------------------- */
 
-.art-item:hover .art-button {
+.art-item:hover .art-title {
 
-    opacity: .9;
+    filter: blur(0);
 
-    background:
-        rgba(255, 255, 255, 0.10);
+    transform:
+        skewX(0)
+        translateX(0);
 
-    border-color:
-        rgba(255, 255, 255, 0.15);
-
-    backdrop-filter: blur(7px);
-
-    -webkit-backdrop-filter: blur(7px);
 }
-
 
 /* --------------------------------
    Text beneath glass
