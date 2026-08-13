@@ -208,7 +208,7 @@ canvas {
 
     #art-navigation {
 
-        bottom: 9%;
+        bottom: 14%;
 
         width: 90vw;
 
@@ -217,9 +217,9 @@ canvas {
         grid-template-columns:
             1fr 1fr;
 
-        column-gap: 28px;
+        column-gap: 24px;
 
-        row-gap: 22px;
+        row-gap: 28px;
 
         justify-items: center;
 
@@ -239,7 +239,7 @@ canvas {
 
     .art-title {
 
-        font-size: 14px;
+        font-size: 16px;
 
         letter-spacing: 0.03em;
 
