@@ -22,25 +22,61 @@
 
     <div class="art-item">
         <span class="art-title">Solar Steam</span>
-        <button class="art-button" aria-label="Open Solar Steam"></button>
+        <button
+            class="art-button"
+            data-art="solar-steam"
+            aria-label="Open Solar Steam">
+        </button>
     </div>
 
     <div class="art-item">
         <span class="art-title">Cloud Break</span>
-        <button class="art-button" aria-label="Open Cloud Break"></button>
+        <button
+            class="art-button"
+            data-art="cloud-break"
+            aria-label="Open Cloud Break">
+        </button>
     </div>
 
     <div class="art-item">
         <span class="art-title">Clinical Perception</span>
-        <button class="art-button" aria-label="Open Clinical Perception"></button>
+        <button
+            class="art-button"
+            data-art="clinical-perception"
+            aria-label="Open Clinical Perception">
+        </button>
     </div>
 
     <div class="art-item">
         <span class="art-title">Idle Thought</span>
-        <button class="art-button" aria-label="Open Idle Thought"></button>
+        <button
+            class="art-button"
+            data-art="idle-thought"
+            aria-label="Open Idle Thought">
+        </button>
     </div>
 
 </nav>
+
+    <div id="art-viewer">
+
+    <button
+        id="viewer-close"
+        aria-label="Close artwork">
+        ×
+    </button>
+
+    <div id="viewer-stage">
+
+        <img
+            id="viewer-image"
+            src=""
+            alt=""
+            draggable="false">
+
+    </div>
+
+</div>
     <script src="script.js"></script>
 
 </body>
