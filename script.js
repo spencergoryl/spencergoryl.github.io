@@ -747,3 +747,31 @@ document.addEventListener(
 
     }
 );
+// --------------------------------
+// ENGRAM Definition
+// --------------------------------
+
+const engramTrigger =
+    document.getElementById("engram-trigger");
+
+const engramDefinition =
+    document.getElementById("engram-definition");
+
+let definitionTimer;
+
+engramTrigger.addEventListener("click", () => {
+
+    // Clear any previous timer
+    clearTimeout(definitionTimer);
+
+    // Show definition
+    engramDefinition.classList.add("visible");
+
+    // Hide after 4 seconds
+    definitionTimer = setTimeout(() => {
+
+        engramDefinition.classList.remove("visible");
+
+    }, 4000);
+
+});
