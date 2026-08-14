@@ -360,7 +360,6 @@ canvas {
 
 }
 
-
 /* --------------------------------
    Close button
 -------------------------------- */
@@ -388,28 +387,38 @@ canvas {
     font-family: Arial, sans-serif;
 
     font-size: 32px;
-
     font-weight: 200;
 
     line-height: 42px;
 
     cursor: pointer;
 
-    opacity: 0.7;
+    opacity: 0;
+
+    pointer-events: none;
 
     transition:
-        opacity 0.2s ease;
+        opacity 0.3s ease;
 
 }
 
 
-#viewer-close:hover {
+/* Show close button only when viewer is open */
+
+#art-viewer.open #viewer-close {
+
+    opacity: 0.7;
+
+    pointer-events: auto;
+
+}
+
+
+#art-viewer.open #viewer-close:hover {
 
     opacity: 1;
 
 }
-
-
 /* --------------------------------
    Mobile viewer
 -------------------------------- */
