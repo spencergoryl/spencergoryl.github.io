@@ -635,15 +635,13 @@ function closeViewer() {
 
     viewerImage.src = "";
 
-     // Reset artwork position
     viewerScale = 1;
-
     viewerX = 0;
     viewerY = 0;
 
     updateViewerTransform();
-}
 
+}
 // --------------------------------
 // Artwork buttons
 // --------------------------------
@@ -788,82 +786,45 @@ engramTrigger.addEventListener("click", () => {
 const viewerStage =
     document.getElementById("viewer-stage");
 
-const viewerImage =
-    document.getElementById("viewer-image");
-
 let viewerScale = 1;
-
 let viewerX = 0;
 let viewerY = 0;
 
-// Zoom limits
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 4;
 
-
-// --------------------------------
-// Touch state
-// --------------------------------
-
-let touches = [];
-
 let lastDistance = null;
-
-let lastCenter = null;
+let lastTouchX = null;
+let lastTouchY = null;
 
 
 // --------------------------------
-// Update image position
+// Update artwork transform
 // --------------------------------
 
 function updateViewerTransform() {
 
     viewerImage.style.transform =
-        `translate3d(${viewerX}px, ${viewerY}px, 0)
-         scale(${viewerScale})`;
+        `translate3d(${viewerX}px, ${viewerY}px, 0) scale(${viewerScale})`;
 
 }
 
 
 // --------------------------------
-// Distance between two fingers
+// Calculate distance between fingers
 // --------------------------------
 
 function getTouchDistance(touch1, touch2) {
 
     const dx =
-        touch2.clientX -
-        touch1.clientX;
+        touch2.clientX - touch1.clientX;
 
     const dy =
-        touch2.clientY -
-        touch1.clientY;
+        touch2.clientY - touch1.clientY;
 
     return Math.sqrt(
-        dx * dx +
-        dy * dy
+        dx * dx + dy * dy
     );
-
-}
-
-
-// --------------------------------
-// Center point between two fingers
-// --------------------------------
-
-function getTouchCenter(touch1, touch2) {
-
-    return {
-
-        x:
-            (touch1.clientX +
-             touch2.clientX) / 2,
-
-        y:
-            (touch1.clientY +
-             touch2.clientY) / 2
-
-    };
 
 }
 
@@ -878,41 +839,23 @@ viewerStage.addEventListener(
 
         event.preventDefault();
 
-        touches =
-            Array.from(event.touches);
-
-        // -------------------------
-        // Two fingers
-        // -------------------------
-
-        if (touches.length === 2) {
+        if (event.touches.length === 2) {
 
             lastDistance =
                 getTouchDistance(
-                    touches[0],
-                    touches[1]
-                );
-
-            lastCenter =
-                getTouchCenter(
-                    touches[0],
-                    touches[1]
+                    event.touches[0],
+                    event.touches[1]
                 );
 
         }
 
-        // -------------------------
-        // One finger
-        // -------------------------
+        if (event.touches.length === 1) {
 
-        else if (touches.length === 1) {
+            lastTouchX =
+                event.touches[0].clientX;
 
-            lastCenter = {
-
-                x: touches[0].clientX,
-                y: touches[0].clientY
-
-            };
+            lastTouchY =
+                event.touches[0].clientY;
 
         }
 
@@ -931,38 +874,25 @@ viewerStage.addEventListener(
 
         event.preventDefault();
 
-        touches =
-            Array.from(event.touches);
 
-        // --------------------------------
+        // -------------------------
         // Pinch zoom
-        // --------------------------------
+        // -------------------------
 
-        if (touches.length === 2) {
+        if (event.touches.length === 2) {
 
             const distance =
                 getTouchDistance(
-                    touches[0],
-                    touches[1]
-                );
-
-            const center =
-                getTouchCenter(
-                    touches[0],
-                    touches[1]
+                    event.touches[0],
+                    event.touches[1]
                 );
 
             if (lastDistance !== null) {
 
-                const zoomChange =
-                    distance /
-                    lastDistance;
+                const zoomAmount =
+                    distance / lastDistance;
 
-                const previousScale =
-                    viewerScale;
-
-                viewerScale *=
-                    zoomChange;
+                viewerScale *= zoomAmount;
 
                 viewerScale =
                     Math.max(
@@ -973,94 +903,50 @@ viewerStage.addEventListener(
                         )
                     );
 
-                // -------------------------
-                // Keep zoom centered
-                // around the fingers
-                // -------------------------
-
-                const scaleRatio =
-                    viewerScale /
-                    previousScale;
-
-                viewerX =
-                    center.x -
-                    (
-                        center.x -
-                        viewerX
-                    ) *
-                    scaleRatio;
-
-                viewerY =
-                    center.y -
-                    (
-                        center.y -
-                        viewerY
-                    ) *
-                    scaleRatio;
+                updateViewerTransform();
 
             }
 
-            // -------------------------
-            // Move image with pinch
-            // -------------------------
-
-            if (lastCenter !== null) {
-
-                viewerX +=
-                    center.x -
-                    lastCenter.x;
-
-                viewerY +=
-                    center.y -
-                    lastCenter.y;
-
-            }
-
-            lastDistance =
-                distance;
-
-            lastCenter =
-                center;
-
-            updateViewerTransform();
+            lastDistance = distance;
 
         }
 
-        // --------------------------------
+
+        // -------------------------
         // One finger pan
-        // --------------------------------
+        // -------------------------
 
         else if (
-            touches.length === 1 &&
+            event.touches.length === 1 &&
             viewerScale > 1
         ) {
 
             const touch =
-                touches[0];
+                event.touches[0];
 
-            const current = {
+            const x =
+                touch.clientX;
 
-                x: touch.clientX,
-                y: touch.clientY
+            const y =
+                touch.clientY;
 
-            };
-
-            if (lastCenter !== null) {
+            if (
+                lastTouchX !== null &&
+                lastTouchY !== null
+            ) {
 
                 viewerX +=
-                    current.x -
-                    lastCenter.x;
+                    x - lastTouchX;
 
                 viewerY +=
-                    current.y -
-                    lastCenter.y;
+                    y - lastTouchY;
+
+                updateViewerTransform();
 
             }
 
-            lastCenter =
-                current;
-
-            updateViewerTransform();
+            lastTouchX = x;
+            lastTouchY = y;
 
         }
 
@@ -1077,28 +963,20 @@ viewerStage.addEventListener(
     "touchend",
     event => {
 
-        touches =
-            Array.from(event.touches);
-
-        // Reset pinch tracking
-
         lastDistance = null;
 
-        // If one finger remains,
-        // continue tracking it for panning
+        if (event.touches.length === 1) {
 
-        if (touches.length === 1) {
+            lastTouchX =
+                event.touches[0].clientX;
 
-            lastCenter = {
-
-                x: touches[0].clientX,
-                y: touches[0].clientY
-
-            };
+            lastTouchY =
+                event.touches[0].clientY;
 
         } else {
 
-            lastCenter = null;
+            lastTouchX = null;
+            lastTouchY = null;
 
         }
 
