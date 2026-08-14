@@ -635,8 +635,14 @@ function closeViewer() {
 
     viewerImage.src = "";
 
-}
+     // Reset artwork position
+    viewerScale = 1;
 
+    viewerX = 0;
+    viewerY = 0;
+
+    updateViewerTransform();
+}
 
 // --------------------------------
 // Artwork buttons
@@ -775,3 +781,327 @@ engramTrigger.addEventListener("click", () => {
     }, 4000);
 
 });
+// --------------------------------
+// Mobile Artwork Zoom & Pan
+// --------------------------------
+
+const viewerStage =
+    document.getElementById("viewer-stage");
+
+const viewerImage =
+    document.getElementById("viewer-image");
+
+let viewerScale = 1;
+
+let viewerX = 0;
+let viewerY = 0;
+
+// Zoom limits
+const MIN_ZOOM = 1;
+const MAX_ZOOM = 4;
+
+
+// --------------------------------
+// Touch state
+// --------------------------------
+
+let touches = [];
+
+let lastDistance = null;
+
+let lastCenter = null;
+
+
+// --------------------------------
+// Update image position
+// --------------------------------
+
+function updateViewerTransform() {
+
+    viewerImage.style.transform =
+        `translate3d(${viewerX}px, ${viewerY}px, 0)
+         scale(${viewerScale})`;
+
+}
+
+
+// --------------------------------
+// Distance between two fingers
+// --------------------------------
+
+function getTouchDistance(touch1, touch2) {
+
+    const dx =
+        touch2.clientX -
+        touch1.clientX;
+
+    const dy =
+        touch2.clientY -
+        touch1.clientY;
+
+    return Math.sqrt(
+        dx * dx +
+        dy * dy
+    );
+
+}
+
+
+// --------------------------------
+// Center point between two fingers
+// --------------------------------
+
+function getTouchCenter(touch1, touch2) {
+
+    return {
+
+        x:
+            (touch1.clientX +
+             touch2.clientX) / 2,
+
+        y:
+            (touch1.clientY +
+             touch2.clientY) / 2
+
+    };
+
+}
+
+
+// --------------------------------
+// Touch start
+// --------------------------------
+
+viewerStage.addEventListener(
+    "touchstart",
+    event => {
+
+        event.preventDefault();
+
+        touches =
+            Array.from(event.touches);
+
+        // -------------------------
+        // Two fingers
+        // -------------------------
+
+        if (touches.length === 2) {
+
+            lastDistance =
+                getTouchDistance(
+                    touches[0],
+                    touches[1]
+                );
+
+            lastCenter =
+                getTouchCenter(
+                    touches[0],
+                    touches[1]
+                );
+
+        }
+
+        // -------------------------
+        // One finger
+        // -------------------------
+
+        else if (touches.length === 1) {
+
+            lastCenter = {
+
+                x: touches[0].clientX,
+                y: touches[0].clientY
+
+            };
+
+        }
+
+    },
+    { passive: false }
+);
+
+
+// --------------------------------
+// Touch movement
+// --------------------------------
+
+viewerStage.addEventListener(
+    "touchmove",
+    event => {
+
+        event.preventDefault();
+
+        touches =
+            Array.from(event.touches);
+
+        // --------------------------------
+        // Pinch zoom
+        // --------------------------------
+
+        if (touches.length === 2) {
+
+            const distance =
+                getTouchDistance(
+                    touches[0],
+                    touches[1]
+                );
+
+            const center =
+                getTouchCenter(
+                    touches[0],
+                    touches[1]
+                );
+
+            if (lastDistance !== null) {
+
+                const zoomChange =
+                    distance /
+                    lastDistance;
+
+                const previousScale =
+                    viewerScale;
+
+                viewerScale *=
+                    zoomChange;
+
+                viewerScale =
+                    Math.max(
+                        MIN_ZOOM,
+                        Math.min(
+                            MAX_ZOOM,
+                            viewerScale
+                        )
+                    );
+
+                // -------------------------
+                // Keep zoom centered
+                // around the fingers
+                // -------------------------
+
+                const scaleRatio =
+                    viewerScale /
+                    previousScale;
+
+                viewerX =
+                    center.x -
+                    (
+                        center.x -
+                        viewerX
+                    ) *
+                    scaleRatio;
+
+                viewerY =
+                    center.y -
+                    (
+                        center.y -
+                        viewerY
+                    ) *
+                    scaleRatio;
+
+            }
+
+            // -------------------------
+            // Move image with pinch
+            // -------------------------
+
+            if (lastCenter !== null) {
+
+                viewerX +=
+                    center.x -
+                    lastCenter.x;
+
+                viewerY +=
+                    center.y -
+                    lastCenter.y;
+
+            }
+
+            lastDistance =
+                distance;
+
+            lastCenter =
+                center;
+
+            updateViewerTransform();
+
+        }
+
+        // --------------------------------
+        // One finger pan
+        // --------------------------------
+
+        else if (
+            touches.length === 1 &&
+            viewerScale > 1
+        ) {
+
+            const touch =
+                touches[0];
+
+            const current = {
+
+                x: touch.clientX,
+                y: touch.clientY
+
+            };
+
+            if (lastCenter !== null) {
+
+                viewerX +=
+                    current.x -
+                    lastCenter.x;
+
+                viewerY +=
+                    current.y -
+                    lastCenter.y;
+
+            }
+
+            lastCenter =
+                current;
+
+            updateViewerTransform();
+
+        }
+
+    },
+    { passive: false }
+);
+
+
+// --------------------------------
+// Touch end
+// --------------------------------
+
+viewerStage.addEventListener(
+    "touchend",
+    event => {
+
+        touches =
+            Array.from(event.touches);
+
+        // Reset pinch tracking
+
+        lastDistance = null;
+
+        // If one finger remains,
+        // continue tracking it for panning
+
+        if (touches.length === 1) {
+
+            lastCenter = {
+
+                x: touches[0].clientX,
+                y: touches[0].clientY
+
+            };
+
+        } else {
+
+            lastCenter = null;
+
+        }
+
+    },
+    { passive: false }
+);
