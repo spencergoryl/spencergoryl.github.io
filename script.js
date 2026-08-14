@@ -874,44 +874,75 @@ viewerStage.addEventListener(
 
         event.preventDefault();
 
+// -------------------------
+// Pinch zoom
+// -------------------------
 
-        // -------------------------
-        // Pinch zoom
-        // -------------------------
+if (event.touches.length === 2) {
 
-        if (event.touches.length === 2) {
+    const distance =
+        getTouchDistance(
+            event.touches[0],
+            event.touches[1]
+        );
 
-            const distance =
-                getTouchDistance(
-                    event.touches[0],
-                    event.touches[1]
-                );
+    if (lastDistance !== null) {
 
-            if (lastDistance !== null) {
+        const zoomAmount =
+            distance / lastDistance;
 
-                const zoomAmount =
-                    distance / lastDistance;
+        const previousScale =
+            viewerScale;
 
-                viewerScale *= zoomAmount;
+        viewerScale *= zoomAmount;
 
-                viewerScale =
-                    Math.max(
-                        MIN_ZOOM,
-                        Math.min(
-                            MAX_ZOOM,
-                            viewerScale
-                        )
-                    );
+        viewerScale =
+            Math.max(
+                MIN_ZOOM,
+                Math.min(
+                    MAX_ZOOM,
+                    viewerScale
+                )
+            );
 
-                updateViewerTransform();
+        // --------------------------------
+        // Zooming out
+        // Gradually return toward center
+        // --------------------------------
 
-            }
+        if (viewerScale < previousScale) {
 
-            lastDistance = distance;
+            const centeringAmount =
+                0.12;
+
+            viewerX *=
+                1 - centeringAmount;
+
+            viewerY *=
+                1 - centeringAmount;
 
         }
 
+        // --------------------------------
+        // Fully centered at minimum zoom
+        // --------------------------------
 
+        if (viewerScale <= MIN_ZOOM) {
+
+            viewerScale = MIN_ZOOM;
+
+            viewerX = 0;
+            viewerY = 0;
+
+        }
+
+        updateViewerTransform();
+
+    }
+
+    lastDistance = distance;
+
+}
         // -------------------------
         // One finger pan
         // -------------------------
