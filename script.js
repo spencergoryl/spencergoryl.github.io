@@ -576,127 +576,8 @@ const artItems =
 const isMobile =
     window.matchMedia("(hover: none)").matches;
 
+
 // --------------------------------
-// Navigation interaction
-// --------------------------------
-
-const artItems =
-    document.querySelectorAll(".art-item");
-
-const isMobile =
-    window.matchMedia("(hover: none)").matches;
-
-
-artItems.forEach(item => {
-
-    const button =
-        item.querySelector(".art-button");
-
-    button.addEventListener(
-        "click",
-        event => {
-
-            const artName =
-                button.dataset.art;
-
-
-            // -------------------------
-            // Mobile
-            // -------------------------
-
-            if (isMobile) {
-
-                if (
-                    !item.classList.contains(
-                        "focused"
-                    )
-                ) {
-
-                    event.preventDefault();
-
-                    // Remove focus from others
-
-                    artItems.forEach(
-                        otherItem => {
-
-                            if (
-                                otherItem !== item
-                            ) {
-
-                                otherItem.classList
-                                    .remove(
-                                        "focused"
-                                    );
-
-                            }
-
-                        }
-                    );
-
-                    // Focus this title
-
-                    item.classList.add(
-                        "focused"
-                    );
-
-                    return;
-
-                }
-
-            }
-
-
-            // -------------------------
-            // Open artwork
-            // -------------------------
-
-            openArtwork(artName);
-
-        }
-    );
-
-});
-
-                // Remove focus from other titles
-                artItems.forEach(otherItem => {
-
-                    if (otherItem !== item) {
-
-                        otherItem.classList.remove("focused");
-
-                    }
-
-                });
-
-                // First tap focuses this title
-                item.classList.add("focused");
-
-            } else {
-
-                // Second tap opens artwork
-
-const artName =
-    button.dataset.art;
-
-const imagePath =
-    artworkPaths[artName];
-
-if (!imagePath) return;
-
-viewerImage.src = imagePath;
-
-viewerImage.alt = artName
-    .replace(/-/g, " ");
-
-artViewer.classList.add("open");
-
-document.body.style.overflow = "hidden";
-            }
-
-        });
-
-    });
-   // --------------------------------
 // Artwork Viewer
 // --------------------------------
 
@@ -708,9 +589,6 @@ const viewerImage =
 
 const viewerClose =
     document.getElementById("viewer-close");
-
-const artButtons =
-    document.querySelectorAll(".art-button");
 
 
 // --------------------------------
@@ -735,10 +613,8 @@ function openArtwork(artName) {
 
     viewerImage.src = imagePath;
 
-    viewerImage.alt = artName.replace(
-        /-/g,
-        " "
-    );
+    viewerImage.alt =
+        artName.replace(/-/g, " ");
 
     artViewer.classList.add("open");
 
@@ -766,7 +642,11 @@ function closeViewer() {
 // Artwork buttons
 // --------------------------------
 
-artButtons.forEach(button => {
+artItems.forEach(item => {
+
+    const button =
+        item.querySelector(".art-button");
+
 
     button.addEventListener(
         "click",
@@ -774,6 +654,61 @@ artButtons.forEach(button => {
 
             const artName =
                 button.dataset.art;
+
+
+            // --------------------------------
+            // Mobile
+            // --------------------------------
+
+            if (isMobile) {
+
+                // First tap reveals the title
+
+                if (
+                    !item.classList.contains("focused")
+                ) {
+
+                    event.preventDefault();
+
+
+                    // Remove focus from
+                    // every other title
+
+                    artItems.forEach(
+                        otherItem => {
+
+                            if (
+                                otherItem !== item
+                            ) {
+
+                                otherItem.classList.remove(
+                                    "focused"
+                                );
+
+                            }
+
+                        }
+                    );
+
+
+                    // Reveal this title
+
+                    item.classList.add(
+                        "focused"
+                    );
+
+                    return;
+
+                }
+
+            }
+
+
+            // --------------------------------
+            // Desktop click
+            // OR
+            // Mobile second tap
+            // --------------------------------
 
             openArtwork(artName);
 
