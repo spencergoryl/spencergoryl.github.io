@@ -4,16 +4,16 @@ const ctx = canvas.getContext("2d");
 const artworkPaths = {
 
     "solar-steam":
-        "images/solar-steam.jpg",
+        "solar-steam.jpg",
 
     "cloud-break":
-        "images/cloud-break.jpg",
+        "cloud-break.jpg",
 
     "clinical-perception":
-        "images/clinical-perception.jpg",
+        "clinical-perception.jpg",
 
     "idle-thought":
-        "images/idle-thought.jpg"
+        "idle-thought.jpg"
 
 };
 // --------------------------------
