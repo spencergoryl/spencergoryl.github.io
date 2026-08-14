@@ -418,29 +418,27 @@ Definition text
 
     position: absolute;
 
-    max-width: 90vw;
-    max-height: 90vh;
-
     width: auto;
     height: auto;
+
+    max-width: none;
+    max-height: none;
 
     object-fit: contain;
 
     user-select: none;
-
     -webkit-user-select: none;
 
+    pointer-events: none;
+
     will-change: transform;
+
+    transform-origin: center center;
 
     transform:
         translate3d(0, 0, 0)
         scale(1);
-
-    cursor: grab;
-
 }
-
-
 /* --------------------------------
    Zoomed image cursor
 -------------------------------- */
