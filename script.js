@@ -576,18 +576,86 @@ const artItems =
 const isMobile =
     window.matchMedia("(hover: none)").matches;
 
-if (isMobile) {
+// --------------------------------
+// Navigation interaction
+// --------------------------------
 
-    artItems.forEach(item => {
+const artItems =
+    document.querySelectorAll(".art-item");
 
-        const button =
-            item.querySelector(".art-button");
+const isMobile =
+    window.matchMedia("(hover: none)").matches;
 
-        button.addEventListener("click", event => {
 
-            if (!item.classList.contains("focused")) {
+artItems.forEach(item => {
 
-                event.preventDefault();
+    const button =
+        item.querySelector(".art-button");
+
+    button.addEventListener(
+        "click",
+        event => {
+
+            const artName =
+                button.dataset.art;
+
+
+            // -------------------------
+            // Mobile
+            // -------------------------
+
+            if (isMobile) {
+
+                if (
+                    !item.classList.contains(
+                        "focused"
+                    )
+                ) {
+
+                    event.preventDefault();
+
+                    // Remove focus from others
+
+                    artItems.forEach(
+                        otherItem => {
+
+                            if (
+                                otherItem !== item
+                            ) {
+
+                                otherItem.classList
+                                    .remove(
+                                        "focused"
+                                    );
+
+                            }
+
+                        }
+                    );
+
+                    // Focus this title
+
+                    item.classList.add(
+                        "focused"
+                    );
+
+                    return;
+
+                }
+
+            }
+
+
+            // -------------------------
+            // Open artwork
+            // -------------------------
+
+            openArtwork(artName);
+
+        }
+    );
+
+});
 
                 // Remove focus from other titles
                 artItems.forEach(otherItem => {
@@ -628,7 +696,7 @@ document.body.style.overflow = "hidden";
         });
 
     });
-    // --------------------------------
+   // --------------------------------
 // Artwork Viewer
 // --------------------------------
 
@@ -645,32 +713,42 @@ const artButtons =
     document.querySelectorAll(".art-button");
 
 
-artButtons.forEach(button => {
+// --------------------------------
+// Open artwork
+// --------------------------------
 
-    button.addEventListener("click", event => {
+function openArtwork(artName) {
 
-        const artName =
-            button.dataset.art;
+    const imagePath =
+        artworkPaths[artName];
 
-        const imagePath =
-            artworkPaths[artName];
+    if (!imagePath) {
 
-        if (!imagePath) return;
+        console.error(
+            "Artwork not found:",
+            artName
+        );
 
-        viewerImage.src = imagePath;
+        return;
 
-        viewerImage.alt = artName
-            .replace(/-/g, " ");
+    }
 
-        artViewer.classList.add("open");
+    viewerImage.src = imagePath;
 
-        document.body.style.overflow = "hidden";
+    viewerImage.alt = artName.replace(
+        /-/g,
+        " "
+    );
 
-    });
+    artViewer.classList.add("open");
 
-});
-    // --------------------------------
-// Close viewer
+    document.body.style.overflow = "hidden";
+
+}
+
+
+// --------------------------------
+// Close artwork
 // --------------------------------
 
 function closeViewer() {
@@ -684,14 +762,42 @@ function closeViewer() {
 }
 
 
+// --------------------------------
+// Artwork buttons
+// --------------------------------
+
+artButtons.forEach(button => {
+
+    button.addEventListener(
+        "click",
+        event => {
+
+            const artName =
+                button.dataset.art;
+
+            openArtwork(artName);
+
+        }
+    );
+
+});
+
+
+// --------------------------------
+// Close button
+// --------------------------------
+
 viewerClose.addEventListener(
     "click",
     closeViewer
 );
-    // --------------------------------
-// Keyboard Escape
+
+
 // --------------------------------
-    document.addEventListener(
+// Escape key
+// --------------------------------
+
+document.addEventListener(
     "keydown",
     event => {
 
@@ -706,5 +812,3 @@ viewerClose.addEventListener(
 
     }
 );
-
-}
