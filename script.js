@@ -761,100 +761,60 @@ document.fonts.ready.then(() => {
 
 });
 
-
 // ================================================
 // ARTWORK VIEWER
 // ================================================
 
-
-// --------------------------------
-// Mobile navigation
-// --------------------------------
-
-const artItems =
-    document.querySelectorAll(
-        ".art-item"
-    );
-
-const isMobile =
-    window
-        .matchMedia("(hover: none)")
-        .matches;
-
-
-// --------------------------------
-// Viewer elements
-// --------------------------------
-
 const artViewer =
-    document.getElementById(
-        "art-viewer"
-    );
+    document.getElementById("art-viewer");
 
 const viewerImage =
-    document.getElementById(
-        "viewer-image"
-    );
+    document.getElementById("viewer-image");
 
 const viewerClose =
-    document.getElementById(
-        "viewer-close"
-    );
+    document.getElementById("viewer-close");
 
 const viewerStage =
-    document.getElementById(
-        "viewer-stage"
-    );
+    document.getElementById("viewer-stage");
+
+const artItems =
+    document.querySelectorAll(".art-item");
+
+const isMobile =
+    window.matchMedia("(hover: none)").matches;
 
 
 // --------------------------------
 // Viewer state
 // --------------------------------
 
-let viewerScale =
-    1;
+let viewerScale = 1;
 
-let viewerBaseScale =
-    1;
+let viewerX = 0;
+let viewerY = 0;
 
-let viewerX =
-    0;
+const MIN_ZOOM = 1;
+const MAX_ZOOM = 4;
 
-let viewerY =
-    0;
+let lastDistance = null;
 
-const MIN_ZOOM =
-    1;
-
-const MAX_ZOOM =
-    4;
-
-let lastDistance =
-    null;
-
-let lastTouchX =
-    null;
-
-let lastTouchY =
-    null;
+let lastTouchX = null;
+let lastTouchY = null;
 
 
 // --------------------------------
-// Update artwork transform
+// Update image position
 // --------------------------------
 
 function updateViewerTransform() {
-
-    const actualScale =
-        viewerBaseScale *
-        viewerScale;
 
     viewerImage.style.transform =
         `translate3d(
             ${viewerX}px,
             ${viewerY}px,
             0
-        ) scale(${actualScale})`;
+        )
+        scale(${viewerScale})`;
 
 }
 
@@ -882,87 +842,83 @@ function openArtwork(artName) {
 
 
     // --------------------------------
-    // Reset viewer state
+    // Reset viewer
     // --------------------------------
 
-    viewerScale =
-        1;
+    viewerScale = 1;
 
-    viewerX =
-        0;
+    viewerX = 0;
+    viewerY = 0;
 
-    viewerY =
-        0;
+    viewerImage.style.transform =
+        "translate3d(0, 0, 0) scale(1)";
 
 
     // --------------------------------
     // Load image
     // --------------------------------
 
-    viewerImage.onload =
-        function () {
+    viewerImage.onload = function () {
 
-            const imageWidth =
-                viewerImage.naturalWidth;
+        const imageWidth =
+            viewerImage.naturalWidth;
 
-            const imageHeight =
-                viewerImage.naturalHeight;
-
-
-            const stageWidth =
-                viewerStage.clientWidth;
-
-            const stageHeight =
-                viewerStage.clientHeight;
+        const imageHeight =
+            viewerImage.naturalHeight;
 
 
-            // --------------------------------
-            // Fit entire artwork inside
-            // viewer while preserving aspect ratio
-            // --------------------------------
+        const stageWidth =
+            viewerStage.clientWidth;
 
-            viewerBaseScale =
-                Math.min(
-                    stageWidth /
-                        imageWidth,
-
-                    stageHeight /
-                        imageHeight
-                ) * 0.94;
+        const stageHeight =
+            viewerStage.clientHeight;
 
 
-            // --------------------------------
-            // Give image an explicit rendered
-            // size based on its ORIGINAL
-            // pixel dimensions
-            // --------------------------------
+        // --------------------------------
+        // Calculate fit-to-screen size
+        // --------------------------------
 
-            viewerImage.style.width =
-                `${imageWidth *
-                    viewerBaseScale}px`;
-
-            viewerImage.style.height =
-                `${imageHeight *
-                    viewerBaseScale}px`;
+        const fitScale =
+            Math.min(
+                stageWidth / imageWidth,
+                stageHeight / imageHeight
+            ) * 0.94;
 
 
-            // --------------------------------
-            // Start centered
-            // --------------------------------
+        // --------------------------------
+        // Calculate displayed dimensions
+        // --------------------------------
 
-            viewerScale =
-                1;
+        const displayWidth =
+            imageWidth * fitScale;
 
-            viewerX =
-                0;
-
-            viewerY =
-                0;
+        const displayHeight =
+            imageHeight * fitScale;
 
 
-            updateViewerTransform();
+        // --------------------------------
+        // Set actual image dimensions
+        // --------------------------------
 
-        };
+        viewerImage.style.width =
+            `${displayWidth}px`;
+
+        viewerImage.style.height =
+            `${displayHeight}px`;
+
+
+        // --------------------------------
+        // Center image
+        // --------------------------------
+
+        viewerX = 0;
+        viewerY = 0;
+
+        viewerScale = 1;
+
+        updateViewerTransform();
+
+    };
 
 
     // --------------------------------
@@ -971,7 +927,6 @@ function openArtwork(artName) {
 
     viewerImage.src =
         imagePath;
-
 
     viewerImage.alt =
         artName.replace(
@@ -995,7 +950,7 @@ function openArtwork(artName) {
 
 
 // ================================================
-// CLOSE ARTWORK
+// CLOSE VIEWER
 // ================================================
 
 function closeViewer() {
@@ -1008,9 +963,7 @@ function closeViewer() {
         "";
 
 
-    viewerImage.src =
-        "";
-
+    viewerImage.src = "";
 
     viewerImage.style.width =
         "";
@@ -1018,22 +971,14 @@ function closeViewer() {
     viewerImage.style.height =
         "";
 
-
-    viewerScale =
-        1;
-
-    viewerBaseScale =
-        1;
-
-    viewerX =
-        0;
-
-    viewerY =
-        0;
-
-
     viewerImage.style.transform =
         "translate3d(0, 0, 0) scale(1)";
+
+
+    viewerScale = 1;
+
+    viewerX = 0;
+    viewerY = 0;
 
 }
 
@@ -1042,88 +987,77 @@ function closeViewer() {
 // ARTWORK NAVIGATION
 // ================================================
 
-artItems.forEach(
-    item => {
+artItems.forEach(item => {
 
-        const button =
-            item.querySelector(
-                ".art-button"
-            );
+    const button =
+        item.querySelector(".art-button");
 
 
-        button.addEventListener(
-            "click",
-            event => {
+    button.addEventListener(
+        "click",
+        event => {
 
-                const artName =
-                    button.dataset.art;
-
-
-                // --------------------------------
-                // Mobile
-                // --------------------------------
-
-                if (isMobile) {
-
-                    // First tap reveals title
-
-                    if (
-                        !item.classList.contains(
-                            "focused"
-                        )
-                    ) {
-
-                        event.preventDefault();
+            const artName =
+                button.dataset.art;
 
 
-                        // Remove focus
-                        // from other titles
+            // --------------------------------
+            // Mobile
+            // --------------------------------
 
-                        artItems.forEach(
-                            otherItem => {
+            if (isMobile) {
 
-                                if (
-                                    otherItem !== item
-                                ) {
+                // First tap reveals title
 
-                                    otherItem.classList.remove(
-                                        "focused"
-                                    );
+                if (
+                    !item.classList.contains(
+                        "focused"
+                    )
+                ) {
 
-                                }
+                    event.preventDefault();
+
+
+                    artItems.forEach(
+                        otherItem => {
+
+                            if (
+                                otherItem !== item
+                            ) {
+
+                                otherItem.classList.remove(
+                                    "focused"
+                                );
 
                             }
-                        );
+
+                        }
+                    );
 
 
-                        // Reveal this title
+                    item.classList.add(
+                        "focused"
+                    );
 
-                        item.classList.add(
-                            "focused"
-                        );
-
-                        return;
-
-                    }
+                    return;
 
                 }
 
-
-                // --------------------------------
-                // Desktop click
-                // OR
-                // Mobile second tap
-                // --------------------------------
-
-                openArtwork(
-                    artName
-                );
-
             }
-        );
 
-    }
-);
+
+            // --------------------------------
+            // Open artwork
+            // --------------------------------
+
+            openArtwork(
+                artName
+            );
+
+        }
+    );
+
+});
 
 
 // ================================================
@@ -1214,7 +1148,7 @@ if (
 
 
 // ================================================
-// MOBILE ARTWORK ZOOM & PAN
+// MOBILE PINCH ZOOM
 // ================================================
 
 
@@ -1255,9 +1189,7 @@ viewerStage.addEventListener(
         event.preventDefault();
 
 
-        // --------------------------------
         // Two fingers
-        // --------------------------------
 
         if (
             event.touches.length === 2
@@ -1274,9 +1206,7 @@ viewerStage.addEventListener(
         }
 
 
-        // --------------------------------
         // One finger
-        // --------------------------------
 
         if (
             event.touches.length === 1
@@ -1332,21 +1262,9 @@ viewerStage.addEventListener(
                     lastDistance;
 
 
-                const previousScale =
-                    viewerScale;
-
-
-                // --------------------------------
-                // Apply zoom
-                // --------------------------------
-
                 viewerScale *=
                     zoomAmount;
 
-
-                // --------------------------------
-                // Limit zoom
-                // --------------------------------
 
                 viewerScale =
                     Math.max(
@@ -1359,47 +1277,18 @@ viewerStage.addEventListener(
 
 
                 // --------------------------------
-                // Zooming out
-                // gradually return toward center
+                // Center when completely zoomed out
                 // --------------------------------
 
                 if (
-                    viewerScale <
-                    previousScale
-                ) {
-
-                    const centeringAmount =
-                        0.12;
-
-
-                    viewerX *=
-                        1 -
-                        centeringAmount;
-
-                    viewerY *=
-                        1 -
-                        centeringAmount;
-
-                }
-
-
-                // --------------------------------
-                // Fully centered at 1×
-                // --------------------------------
-
-                if (
-                    viewerScale <=
-                    MIN_ZOOM
+                    viewerScale <= MIN_ZOOM
                 ) {
 
                     viewerScale =
                         MIN_ZOOM;
 
-                    viewerX =
-                        0;
-
-                    viewerY =
-                        0;
+                    viewerX = 0;
+                    viewerY = 0;
 
                 }
 
