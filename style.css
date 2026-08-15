@@ -414,7 +414,6 @@ Definition text
    Artwork
 -------------------------------- */
 #viewer-image {
-
     position: absolute;
 
     width: auto;
@@ -427,8 +426,6 @@ Definition text
 
     user-select: none;
     -webkit-user-select: none;
-
-    pointer-events: none;
 
     will-change: transform;
 
