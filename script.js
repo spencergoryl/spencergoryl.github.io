@@ -651,17 +651,35 @@ function openArtwork(artName) {
 
     viewerImage.onload = () => {
 
-        const imageWidth =
-            viewerImage.naturalWidth;
+    const imageWidth =
+        viewerImage.naturalWidth;
 
-        const imageHeight =
-            viewerImage.naturalHeight;
+    const imageHeight =
+        viewerImage.naturalHeight;
 
-        const stageWidth =
-            viewerStage.clientWidth;
+    const stageWidth =
+        viewerStage.clientWidth;
 
-        const stageHeight =
-            viewerStage.clientHeight;
+    const stageHeight =
+        viewerStage.clientHeight;
+
+    // Scale the image so the entire artwork
+    // fits comfortably inside the screen.
+    viewerBaseScale =
+        Math.min(
+            stageWidth / imageWidth,
+            stageHeight / imageHeight
+        ) * 0.94;
+
+    // Start at the natural "fit to screen" size
+    viewerScale = 1;
+
+    // Always start centered
+    viewerX = 0;
+    viewerY = 0;
+
+    updateViewerTransform();
+};
 
         // --------------------------------
         // Calculate scale needed to fit
