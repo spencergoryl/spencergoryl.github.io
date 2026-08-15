@@ -413,7 +413,6 @@ Definition text
 /* --------------------------------
    Artwork
 -------------------------------- */
-
 #viewer-image {
 
     position: absolute;
@@ -435,9 +434,7 @@ Definition text
 
     transform-origin: center center;
 
-    transform:
-        translate3d(0, 0, 0)
-        scale(1);
+    cursor: grab;
 }
 /* --------------------------------
    Zoomed image cursor
