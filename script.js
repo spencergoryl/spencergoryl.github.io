@@ -611,18 +611,33 @@ function openArtwork(artName) {
 
     }
 
+    viewerImage.onload = () => {
+
+        calculateViewerFit();
+
+        viewerScale = 1;
+
+        viewerX = 0;
+        viewerY = 0;
+
+        updateViewerTransform();
+
+    };
+
     viewerImage.src = imagePath;
 
-    viewerImage.alt =
-        artName.replace(/-/g, " ");
+    viewerImage.alt = artName.replace(
+        /-/g,
+        " "
+    );
 
     artViewer.classList.add("open");
+
+    document.body.style.overflow = "";
 
     document.body.style.overflow = "hidden";
 
 }
-
-
 // --------------------------------
 // Close artwork
 // --------------------------------
@@ -787,6 +802,8 @@ const viewerStage =
     document.getElementById("viewer-stage");
 
 let viewerScale = 1;
+let viewerBaseScale = 1;
+
 let viewerX = 0;
 let viewerY = 0;
 
@@ -804,11 +821,45 @@ let lastTouchY = null;
 
 function updateViewerTransform() {
 
+    const actualScale =
+        viewerBaseScale * viewerScale;
+
     viewerImage.style.transform =
-        `translate3d(${viewerX}px, ${viewerY}px, 0) scale(${viewerScale})`;
+        `translate3d(${viewerX}px, ${viewerY}px, 0) scale(${actualScale})`;
 
 }
+// --------------------------------
+// Calculate artwork fit
+// --------------------------------
 
+function calculateViewerFit() {
+
+    const imageWidth =
+        viewerImage.naturalWidth;
+
+    const imageHeight =
+        viewerImage.naturalHeight;
+
+    const stageWidth =
+        viewerStage.clientWidth;
+
+    const stageHeight =
+        viewerStage.clientHeight;
+
+    if (
+        !imageWidth ||
+        !imageHeight
+    ) {
+        return;
+    }
+
+    viewerBaseScale =
+        Math.min(
+            stageWidth / imageWidth,
+            stageHeight / imageHeight
+        );
+
+}
 
 // --------------------------------
 // Calculate distance between fingers
