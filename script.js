@@ -16,6 +16,8 @@ const artworkPaths = {
         "idle-thought.jpg"
 
 };
+
+
 // --------------------------------
 // Preload artwork
 // --------------------------------
@@ -28,8 +30,14 @@ Object.values(artworkPaths).forEach(path => {
 
 });
 
+
 const navigation =
     document.getElementById("art-navigation");
+
+
+// ================================================
+// ENGRAM PARTICLE ANIMATION
+// ================================================
 
 document.fonts.ready.then(() => {
 
@@ -37,18 +45,39 @@ document.fonts.ready.then(() => {
     // Canvas setup
     // --------------------------------
 
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr =
+        Math.min(
+            window.devicePixelRatio || 1,
+            2
+        );
 
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+    const width =
+        window.innerWidth;
 
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
+    const height =
+        window.innerHeight;
 
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
+    canvas.width =
+        width * dpr;
 
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    canvas.height =
+        height * dpr;
+
+    canvas.style.width =
+        `${width}px`;
+
+    canvas.style.height =
+        `${height}px`;
+
+    ctx.setTransform(
+        dpr,
+        0,
+        0,
+        dpr,
+        0,
+        0
+    );
+
 
     // --------------------------------
     // Animation Controls
@@ -72,37 +101,63 @@ document.fonts.ready.then(() => {
 
     const MAX_FONT_SIZE = 100;
 
+
     // --------------------------------
     // Typography
     // --------------------------------
 
-    const fontSize = Math.min(
-        width * 0.1,
-        MAX_FONT_SIZE
-    );
+    const fontSize =
+        Math.min(
+            width * 0.1,
+            MAX_FONT_SIZE
+        );
 
-    const centerX = Math.round(width / 2);
-    const centerY = Math.round(height / 2);
+    const centerX =
+        Math.round(width / 2);
+
+    const centerY =
+        Math.round(height / 2);
 
     const font =
         `700 ${fontSize}px "Averia Serif Libre"`;
+
 
     // --------------------------------
     // Create text mask
     // --------------------------------
 
-    const textCanvas = document.createElement("canvas");
-    const textCtx = textCanvas.getContext("2d");
+    const textCanvas =
+        document.createElement("canvas");
 
-    textCanvas.width = width * dpr;
-    textCanvas.height = height * dpr;
+    const textCtx =
+        textCanvas.getContext("2d");
 
-    textCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    textCanvas.width =
+        width * dpr;
 
-    textCtx.font = font;
-    textCtx.textAlign = "center";
-    textCtx.textBaseline = "middle";
-    textCtx.fillStyle = "white";
+    textCanvas.height =
+        height * dpr;
+
+    textCtx.setTransform(
+        dpr,
+        0,
+        0,
+        dpr,
+        0,
+        0
+    );
+
+    textCtx.font =
+        font;
+
+    textCtx.textAlign =
+        "center";
+
+    textCtx.textBaseline =
+        "middle";
+
+    textCtx.fillStyle =
+        "white";
 
     textCtx.fillText(
         "Engram",
@@ -110,23 +165,27 @@ document.fonts.ready.then(() => {
         centerY
     );
 
+
     // --------------------------------
     // Find text pixels
     // --------------------------------
 
-    const imageData = textCtx.getImageData(
-        0,
-        0,
-        textCanvas.width,
-        textCanvas.height
-    );
+    const imageData =
+        textCtx.getImageData(
+            0,
+            0,
+            textCanvas.width,
+            textCanvas.height
+        );
 
     const pixels = [];
 
-    const sampleSize = Math.max(
-        1,
-        Math.round(5 * dpr)
-    );
+    const sampleSize =
+        Math.max(
+            1,
+            Math.round(5 * dpr)
+        );
+
 
     for (
         let y = 0;
@@ -143,18 +202,24 @@ document.fonts.ready.then(() => {
             const index =
                 (y * textCanvas.width + x) * 4;
 
-            if (imageData.data[index + 3] > 128) {
+            if (
+                imageData.data[index + 3] > 128
+            ) {
 
                 pixels.push({
 
                     x: x / dpr,
+
                     y: y / dpr
 
                 });
 
             }
+
         }
+
     }
+
 
     // --------------------------------
     // Create particles
@@ -169,15 +234,23 @@ document.fonts.ready.then(() => {
     ) {
 
         const target =
-            pixels[i % pixels.length];
+            pixels[
+                i % pixels.length
+            ];
 
         particles.push({
 
-            x: Math.random() * width,
-            y: Math.random() * height,
+            x:
+                Math.random() * width,
 
-            targetX: target.x,
-            targetY: target.y,
+            y:
+                Math.random() * height,
+
+            targetX:
+                target.x,
+
+            targetY:
+                target.y,
 
             size:
                 Math.random() * 2 + 0.5,
@@ -186,21 +259,32 @@ document.fonts.ready.then(() => {
                 Math.random() * 0.8 + 0.6
 
         });
+
     }
+
 
     // --------------------------------
     // Animation state
     // --------------------------------
 
-    let phase = "forming";
+    let phase =
+        "forming";
 
-    let phaseTime = 0;
+    let phaseTime =
+        0;
 
-    let meltProgress = 0;
-    let fontSettleProgress = 0;
-    let particleContractProgress = 0;
+    let meltProgress =
+        0;
 
-    let lastTime = performance.now();
+    let fontSettleProgress =
+        0;
+
+    let particleContractProgress =
+        0;
+
+    let lastTime =
+        performance.now();
+
 
     // --------------------------------
     // Easing
@@ -209,16 +293,28 @@ document.fonts.ready.then(() => {
     function easeInOut(t) {
 
         return t < 0.5
+
             ? 2 * t * t
-            : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
+            : 1 -
+              Math.pow(
+                  -2 * t + 2,
+                  2
+              ) / 2;
 
     }
+
 
     function easeOut(t) {
 
-        return 1 - Math.pow(1 - t, 3);
+        return 1 -
+            Math.pow(
+                1 - t,
+                3
+            );
 
     }
+
 
     // --------------------------------
     // Animation
@@ -232,11 +328,12 @@ document.fonts.ready.then(() => {
                 32
             );
 
-        lastTime = currentTime;
+        lastTime =
+            currentTime;
 
-        // Convert milliseconds to seconds
+        const dt =
+            deltaTime / 1000;
 
-        const dt = deltaTime / 1000;
 
         // --------------------------------
         // Clear canvas
@@ -249,6 +346,7 @@ document.fonts.ready.then(() => {
             height
         );
 
+
         // --------------------------------
         // Move particles toward targets
         // --------------------------------
@@ -260,15 +358,23 @@ document.fonts.ready.then(() => {
         ) {
 
             const followAmount =
-                1 - Math.exp(
+                1 -
+                Math.exp(
                     -FOLLOW_SPEED * 60 * dt
                 );
 
-            let totalDistanceSquared = 0;
+            let totalDistanceSquared =
+                0;
 
-            for (let i = 0; i < particles.length; i++) {
 
-                const particle = particles[i];
+            for (
+                let i = 0;
+                i < particles.length;
+                i++
+            ) {
+
+                const particle =
+                    particles[i];
 
                 const dx =
                     particle.targetX -
@@ -287,13 +393,17 @@ document.fonts.ready.then(() => {
                 totalDistanceSquared +=
                     dx * dx +
                     dy * dy;
+
             }
+
 
             // --------------------------------
             // Detect completed formation
             // --------------------------------
 
-            if (phase === "forming") {
+            if (
+                phase === "forming"
+            ) {
 
                 const averageDistanceSquared =
                     totalDistanceSquared /
@@ -304,56 +414,86 @@ document.fonts.ready.then(() => {
                     12 * 12
                 ) {
 
-                    phase = "holding";
-                    phaseTime = 0;
+                    phase =
+                        "holding";
+
+                    phaseTime =
+                        0;
 
                 }
+
             }
+
         }
+
 
         // --------------------------------
         // Hold dotted ENGRAM
         // --------------------------------
 
-        if (phase === "holding") {
+        if (
+            phase === "holding"
+        ) {
 
-            phaseTime += deltaTime;
+            phaseTime +=
+                deltaTime;
 
-            if (phaseTime >= HOLD_TIME) {
+            if (
+                phaseTime >= HOLD_TIME
+            ) {
 
-                phase = "melting";
-                phaseTime = 0;
+                phase =
+                    "melting";
+
+                phaseTime =
+                    0;
 
             }
+
         }
+
 
         // --------------------------------
         // Melt particles
         // --------------------------------
 
-        if (phase === "melting") {
+        if (
+            phase === "melting"
+        ) {
 
             meltProgress +=
-                deltaTime / MELT_DURATION;
+                deltaTime /
+                MELT_DURATION;
 
-            if (meltProgress >= FONT_APPEAR_POINT) {
+            if (
+                meltProgress >=
+                FONT_APPEAR_POINT
+            ) {
 
                 meltProgress =
                     FONT_APPEAR_POINT;
 
-                phase = "resolving";
-                phaseTime = 0;
+                phase =
+                    "resolving";
+
+                phaseTime =
+                    0;
 
             }
+
         }
+
 
         // --------------------------------
         // Resolve font and particles
         // --------------------------------
 
-        if (phase === "resolving") {
+        if (
+            phase === "resolving"
+        ) {
 
-            phaseTime += deltaTime;
+            phaseTime +=
+                deltaTime;
 
             fontSettleProgress =
                 Math.min(
@@ -374,18 +514,24 @@ document.fonts.ready.then(() => {
                 particleContractProgress >= 1
             ) {
 
-                phase = "complete";
+                phase =
+                    "complete";
 
             }
+
         }
+
 
         // --------------------------------
         // Particle expansion
         // --------------------------------
 
-        let expansion = 0;
+        let expansion =
+            0;
 
-        if (phase === "melting") {
+        if (
+            phase === "melting"
+        ) {
 
             expansion =
                 easeInOut(
@@ -395,13 +541,17 @@ document.fonts.ready.then(() => {
 
         }
 
+
         // --------------------------------
         // Font scale
         // --------------------------------
 
-        let fontScale = 0;
+        let fontScale =
+            0;
 
-        if (phase === "resolving") {
+        if (
+            phase === "resolving"
+        ) {
 
             const eased =
                 easeOut(
@@ -416,17 +566,28 @@ document.fonts.ready.then(() => {
 
         }
 
- if (phase === "complete") {
 
-    fontScale = 1;
+        if (
+            phase === "complete"
+        ) {
 
-    if (!navigation.classList.contains("visible")) {
+            fontScale =
+                1;
 
-        navigation.classList.add("visible");
+            if (
+                !navigation.classList.contains(
+                    "visible"
+                )
+            ) {
 
-    }
+                navigation.classList.add(
+                    "visible"
+                );
 
-}
+            }
+
+        }
+
 
         // --------------------------------
         // Draw particles
@@ -439,7 +600,9 @@ document.fonts.ready.then(() => {
             phase === "resolving"
         ) {
 
-            ctx.fillStyle = "white";
+            ctx.fillStyle =
+                "white";
+
 
             for (
                 let i = 0;
@@ -459,8 +622,9 @@ document.fonts.ready.then(() => {
 
                 let size;
 
+
                 // --------------------------------
-                // Normal particle → expanded
+                // Normal particle
                 // --------------------------------
 
                 if (
@@ -468,9 +632,17 @@ document.fonts.ready.then(() => {
                     phase === "holding"
                 ) {
 
-                    size = normalSize;
+                    size =
+                        normalSize;
 
-                } else if (
+                }
+
+
+                // --------------------------------
+                // Expanded particle
+                // --------------------------------
+
+                else if (
                     phase === "melting"
                 ) {
 
@@ -481,18 +653,22 @@ document.fonts.ready.then(() => {
                             normalSize
                         ) * expansion;
 
-                } else {
+                }
 
-                    // --------------------------------
-                    // Contract particles
-                    // --------------------------------
+
+                // --------------------------------
+                // Contract particles
+                // --------------------------------
+
+                else {
 
                     const contract =
                         easeInOut(
                             particleContractProgress
                         );
 
-                    const minimumSize = 0.15;
+                    const minimumSize =
+                        0.15;
 
                     size =
                         expandedSize *
@@ -502,9 +678,14 @@ document.fonts.ready.then(() => {
                                 1 -
                                 minimumSize
                             ) *
-                            (1 - contract)
+                            (
+                                1 -
+                                contract
+                            )
                         );
+
                 }
+
 
                 ctx.beginPath();
 
@@ -519,7 +700,9 @@ document.fonts.ready.then(() => {
                 ctx.fill();
 
             }
+
         }
+
 
         // --------------------------------
         // Draw crisp typography
@@ -542,11 +725,17 @@ document.fonts.ready.then(() => {
                 fontScale
             );
 
-            ctx.font = font;
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
+            ctx.font =
+                font;
 
-            ctx.fillStyle = "white";
+            ctx.textAlign =
+                "center";
+
+            ctx.textBaseline =
+                "middle";
+
+            ctx.fillStyle =
+                "white";
 
             ctx.fillText(
                 "Engram",
@@ -558,57 +747,96 @@ document.fonts.ready.then(() => {
 
         }
 
-        requestAnimationFrame(animate);
+
+        requestAnimationFrame(
+            animate
+        );
 
     }
 
-    requestAnimationFrame(animate);
+
+    requestAnimationFrame(
+        animate
+    );
 
 });
 
+
+// ================================================
+// ARTWORK VIEWER
+// ================================================
+
+
 // --------------------------------
-// Mobile navigation interaction
+// Mobile navigation
 // --------------------------------
 
 const artItems =
-    document.querySelectorAll(".art-item");
+    document.querySelectorAll(
+        ".art-item"
+    );
 
 const isMobile =
-    window.matchMedia("(hover: none)").matches;
+    window
+        .matchMedia("(hover: none)")
+        .matches;
+
 
 // --------------------------------
-// Artwork Viewer
+// Viewer elements
 // --------------------------------
 
 const artViewer =
-    document.getElementById("art-viewer");
+    document.getElementById(
+        "art-viewer"
+    );
 
 const viewerImage =
-    document.getElementById("viewer-image");
+    document.getElementById(
+        "viewer-image"
+    );
 
 const viewerClose =
-    document.getElementById("viewer-close");
+    document.getElementById(
+        "viewer-close"
+    );
 
 const viewerStage =
-    document.getElementById("viewer-stage");
+    document.getElementById(
+        "viewer-stage"
+    );
 
 
 // --------------------------------
 // Viewer state
 // --------------------------------
 
-let viewerScale = 1;
-let viewerBaseScale = 1;
+let viewerScale =
+    1;
 
-let viewerX = 0;
-let viewerY = 0;
+let viewerBaseScale =
+    1;
 
-const MIN_ZOOM = 1;
-const MAX_ZOOM = 4;
+let viewerX =
+    0;
 
-let lastDistance = null;
-let lastTouchX = null;
-let lastTouchY = null;
+let viewerY =
+    0;
+
+const MIN_ZOOM =
+    1;
+
+const MAX_ZOOM =
+    4;
+
+let lastDistance =
+    null;
+
+let lastTouchX =
+    null;
+
+let lastTouchY =
+    null;
 
 
 // --------------------------------
@@ -618,22 +846,28 @@ let lastTouchY = null;
 function updateViewerTransform() {
 
     const actualScale =
-        viewerBaseScale * viewerScale;
+        viewerBaseScale *
+        viewerScale;
 
     viewerImage.style.transform =
-        `translate3d(${viewerX}px, ${viewerY}px, 0)
-         scale(${actualScale})`;
+        `translate3d(
+            ${viewerX}px,
+            ${viewerY}px,
+            0
+        ) scale(${actualScale})`;
+
 }
 
 
-// --------------------------------
-// Open artwork
-// --------------------------------
+// ================================================
+// OPEN ARTWORK
+// ================================================
 
 function openArtwork(artName) {
 
     const imagePath =
         artworkPaths[artName];
+
 
     if (!imagePath) {
 
@@ -643,187 +877,258 @@ function openArtwork(artName) {
         );
 
         return;
+
     }
+
+
+    // --------------------------------
+    // Reset viewer state
+    // --------------------------------
+
+    viewerScale =
+        1;
+
+    viewerX =
+        0;
+
+    viewerY =
+        0;
+
 
     // --------------------------------
     // Load image
     // --------------------------------
 
-    viewerImage.onload = () => {
+    viewerImage.onload =
+        function () {
 
-    const imageWidth =
-        viewerImage.naturalWidth;
+            const imageWidth =
+                viewerImage.naturalWidth;
 
-    const imageHeight =
-        viewerImage.naturalHeight;
+            const imageHeight =
+                viewerImage.naturalHeight;
 
-    const stageWidth =
-        viewerStage.clientWidth;
 
-    const stageHeight =
-        viewerStage.clientHeight;
+            const stageWidth =
+                viewerStage.clientWidth;
 
-    // Scale the image so the entire artwork
-    // fits comfortably inside the screen.
-    viewerBaseScale =
-        Math.min(
-            stageWidth / imageWidth,
-            stageHeight / imageHeight
-        ) * 0.94;
+            const stageHeight =
+                viewerStage.clientHeight;
 
-    // Start at the natural "fit to screen" size
-    viewerScale = 1;
 
-    // Always start centered
-    viewerX = 0;
-    viewerY = 0;
+            // --------------------------------
+            // Fit entire artwork inside
+            // viewer while preserving aspect ratio
+            // --------------------------------
 
-    updateViewerTransform();
-};
+            viewerBaseScale =
+                Math.min(
+                    stageWidth /
+                        imageWidth,
 
-        // --------------------------------
-        // Calculate scale needed to fit
-        // the entire artwork on screen
-        // --------------------------------
+                    stageHeight /
+                        imageHeight
+                ) * 0.94;
 
-        viewerBaseScale =
-            Math.min(
-                stageWidth / imageWidth,
-                stageHeight / imageHeight
-            );
 
-        // --------------------------------
-        // Reset viewer
-        // --------------------------------
+            // --------------------------------
+            // Give image an explicit rendered
+            // size based on its ORIGINAL
+            // pixel dimensions
+            // --------------------------------
 
-        viewerScale = 1;
+            viewerImage.style.width =
+                `${imageWidth *
+                    viewerBaseScale}px`;
 
-        viewerX = 0;
-        viewerY = 0;
+            viewerImage.style.height =
+                `${imageHeight *
+                    viewerBaseScale}px`;
 
-        updateViewerTransform();
-    };
 
+            // --------------------------------
+            // Start centered
+            // --------------------------------
+
+            viewerScale =
+                1;
+
+            viewerX =
+                0;
+
+            viewerY =
+                0;
+
+
+            updateViewerTransform();
+
+        };
+
+
+    // --------------------------------
+    // Set image
+    // --------------------------------
 
     viewerImage.src =
         imagePath;
 
+
     viewerImage.alt =
-        artName.replace(/-/g, " ");
+        artName.replace(
+            /-/g,
+            " "
+        );
+
 
     // --------------------------------
     // Show viewer
     // --------------------------------
 
-    artViewer.classList.add("open");
+    artViewer.classList.add(
+        "open"
+    );
 
     document.body.style.overflow =
         "hidden";
+
 }
 
 
-// --------------------------------
-// Close artwork
-// --------------------------------
+// ================================================
+// CLOSE ARTWORK
+// ================================================
 
 function closeViewer() {
 
-    artViewer.classList.remove("open");
+    artViewer.classList.remove(
+        "open"
+    );
 
-    document.body.style.overflow = "";
+    document.body.style.overflow =
+        "";
 
-    viewerImage.src = "";
 
-    viewerScale = 1;
+    viewerImage.src =
+        "";
 
-    viewerBaseScale = 1;
 
-    viewerX = 0;
-    viewerY = 0;
+    viewerImage.style.width =
+        "";
+
+    viewerImage.style.height =
+        "";
+
+
+    viewerScale =
+        1;
+
+    viewerBaseScale =
+        1;
+
+    viewerX =
+        0;
+
+    viewerY =
+        0;
+
 
     viewerImage.style.transform =
         "translate3d(0, 0, 0) scale(1)";
+
 }
 
 
-// --------------------------------
-// Artwork navigation
-// --------------------------------
+// ================================================
+// ARTWORK NAVIGATION
+// ================================================
 
-artItems.forEach(item => {
+artItems.forEach(
+    item => {
 
-    const button =
-        item.querySelector(".art-button");
-
-    button.addEventListener(
-        "click",
-        event => {
-
-            const artName =
-                button.dataset.art;
+        const button =
+            item.querySelector(
+                ".art-button"
+            );
 
 
-            // --------------------------------
-            // Mobile
-            // --------------------------------
+        button.addEventListener(
+            "click",
+            event => {
 
-            if (isMobile) {
+                const artName =
+                    button.dataset.art;
 
-                // First tap reveals title
 
-                if (
-                    !item.classList.contains(
-                        "focused"
-                    )
-                ) {
+                // --------------------------------
+                // Mobile
+                // --------------------------------
 
-                    event.preventDefault();
+                if (isMobile) {
 
-                    // Remove focus from
-                    // other titles
+                    // First tap reveals title
 
-                    artItems.forEach(
-                        otherItem => {
+                    if (
+                        !item.classList.contains(
+                            "focused"
+                        )
+                    ) {
 
-                            if (
-                                otherItem !== item
-                            ) {
+                        event.preventDefault();
 
-                                otherItem.classList.remove(
-                                    "focused"
-                                );
+
+                        // Remove focus
+                        // from other titles
+
+                        artItems.forEach(
+                            otherItem => {
+
+                                if (
+                                    otherItem !== item
+                                ) {
+
+                                    otherItem.classList.remove(
+                                        "focused"
+                                    );
+
+                                }
+
                             }
-                        }
-                    );
+                        );
 
-                    // Reveal this title
 
-                    item.classList.add(
-                        "focused"
-                    );
+                        // Reveal this title
 
-                    return;
+                        item.classList.add(
+                            "focused"
+                        );
+
+                        return;
+
+                    }
+
                 }
+
+
+                // --------------------------------
+                // Desktop click
+                // OR
+                // Mobile second tap
+                // --------------------------------
+
+                openArtwork(
+                    artName
+                );
+
             }
+        );
+
+    }
+);
 
 
-            // --------------------------------
-            // Desktop click
-            // OR
-            // Mobile second tap
-            // --------------------------------
-
-            openArtwork(artName);
-
-        }
-    );
-
-});
-
-
-// --------------------------------
-// Close button
-// --------------------------------
+// ================================================
+// CLOSE BUTTON
+// ================================================
 
 viewerClose.addEventListener(
     "click",
@@ -831,9 +1136,9 @@ viewerClose.addEventListener(
 );
 
 
-// --------------------------------
-// Escape key
-// --------------------------------
+// ================================================
+// ESCAPE KEY
+// ================================================
 
 document.addEventListener(
     "keydown",
@@ -841,65 +1146,76 @@ document.addEventListener(
 
         if (
             event.key === "Escape" &&
-            artViewer.classList.contains("open")
+            artViewer.classList.contains(
+                "open"
+            )
         ) {
 
             closeViewer();
+
         }
 
     }
 );
 
 
-// --------------------------------
-// ENGRAM Definition
-// --------------------------------
+// ================================================
+// ENGRAM DEFINITION
+// ================================================
 
 const engramTrigger =
-    document.getElementById("engram-trigger");
+    document.getElementById(
+        "engram-trigger"
+    );
 
 const engramDefinition =
-    document.getElementById("engram-definition");
+    document.getElementById(
+        "engram-definition"
+    );
 
 let definitionTimer;
 
-engramTrigger.addEventListener(
-    "click",
-    () => {
 
-        // Clear previous timer
+if (
+    engramTrigger &&
+    engramDefinition
+) {
 
-        clearTimeout(
-            definitionTimer
-        );
+    engramTrigger.addEventListener(
+        "click",
+        () => {
 
-        // Show definition
-
-        engramDefinition.classList.add(
-            "visible"
-        );
-
-        // Hide after 4 seconds
-
-        definitionTimer =
-            setTimeout(
-                () => {
-
-                    engramDefinition.classList.remove(
-                        "visible"
-                    );
-
-                },
-                4000
+            clearTimeout(
+                definitionTimer
             );
 
-    }
-);
+
+            engramDefinition.classList.add(
+                "visible"
+            );
 
 
-// --------------------------------
-// Mobile Artwork Zoom & Pan
-// --------------------------------
+            definitionTimer =
+                setTimeout(
+                    () => {
+
+                        engramDefinition.classList.remove(
+                            "visible"
+                        );
+
+                    },
+                    4000
+                );
+
+        }
+    );
+
+}
+
+
+// ================================================
+// MOBILE ARTWORK ZOOM & PAN
+// ================================================
 
 
 // --------------------------------
@@ -919,10 +1235,12 @@ function getTouchDistance(
         touch2.clientY -
         touch1.clientY;
 
+
     return Math.sqrt(
         dx * dx +
         dy * dy
     );
+
 }
 
 
@@ -952,6 +1270,7 @@ viewerStage.addEventListener(
                 );
 
             return;
+
         }
 
 
@@ -968,6 +1287,7 @@ viewerStage.addEventListener(
 
             lastTouchY =
                 event.touches[0].clientY;
+
         }
 
     },
@@ -1011,6 +1331,7 @@ viewerStage.addEventListener(
                     distance /
                     lastDistance;
 
+
                 const previousScale =
                     viewerScale;
 
@@ -1038,7 +1359,7 @@ viewerStage.addEventListener(
 
 
                 // --------------------------------
-                // Zooming OUT
+                // Zooming out
                 // gradually return toward center
                 // --------------------------------
 
@@ -1050,6 +1371,7 @@ viewerStage.addEventListener(
                     const centeringAmount =
                         0.12;
 
+
                     viewerX *=
                         1 -
                         centeringAmount;
@@ -1057,6 +1379,7 @@ viewerStage.addEventListener(
                     viewerY *=
                         1 -
                         centeringAmount;
+
                 }
 
 
@@ -1065,18 +1388,24 @@ viewerStage.addEventListener(
                 // --------------------------------
 
                 if (
-                    viewerScale <= MIN_ZOOM
+                    viewerScale <=
+                    MIN_ZOOM
                 ) {
 
                     viewerScale =
                         MIN_ZOOM;
 
-                    viewerX = 0;
-                    viewerY = 0;
+                    viewerX =
+                        0;
+
+                    viewerY =
+                        0;
+
                 }
 
 
                 updateViewerTransform();
+
             }
 
 
@@ -1084,6 +1413,7 @@ viewerStage.addEventListener(
                 distance;
 
             return;
+
         }
 
 
@@ -1098,6 +1428,7 @@ viewerStage.addEventListener(
 
             const touch =
                 event.touches[0];
+
 
             const x =
                 touch.clientX;
@@ -1119,12 +1450,18 @@ viewerStage.addEventListener(
                     y -
                     lastTouchY;
 
+
                 updateViewerTransform();
+
             }
 
 
-            lastTouchX = x;
-            lastTouchY = y;
+            lastTouchX =
+                x;
+
+            lastTouchY =
+                y;
+
         }
 
     },
@@ -1142,7 +1479,8 @@ viewerStage.addEventListener(
     "touchend",
     event => {
 
-        lastDistance = null;
+        lastDistance =
+            null;
 
 
         if (
@@ -1157,8 +1495,12 @@ viewerStage.addEventListener(
 
         } else {
 
-            lastTouchX = null;
-            lastTouchY = null;
+            lastTouchX =
+                null;
+
+            lastTouchY =
+                null;
+
         }
 
     },
