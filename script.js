@@ -613,24 +613,32 @@ function openArtwork(artName) {
 
     viewerImage.onload = () => {
 
-        const imageWidth =
-            viewerImage.naturalWidth;
+    const imageWidth =
+        viewerImage.naturalWidth;
 
-        const imageHeight =
-            viewerImage.naturalHeight;
+    const imageHeight =
+        viewerImage.naturalHeight;
 
-        const stageWidth =
-            viewerStage.clientWidth;
+    const stageWidth =
+        viewerStage.clientWidth;
 
-        const stageHeight =
-            viewerStage.clientHeight;
+    const stageHeight =
+        viewerStage.clientHeight;
 
-        const fitScale =
-            Math.min(
-                stageWidth / imageWidth,
-                stageHeight / imageHeight
-            );
+    viewerBaseScale =
+        Math.min(
+            stageWidth / imageWidth,
+            stageHeight / imageHeight
+        );
 
+    viewerScale = 1;
+
+    viewerX = 0;
+    viewerY = 0;
+
+    updateViewerTransform();
+
+};
         // Set the image's initial display size
         viewerImage.style.width =
             `${imageWidth * fitScale}px`;
@@ -826,6 +834,7 @@ const viewerStage =
     document.getElementById("viewer-stage");
 
 let viewerScale = 1;
+let viewerBaseScale = 1;
 
 let viewerX = 0;
 let viewerY = 0;
@@ -844,11 +853,14 @@ let lastTouchY = null;
 
 function updateViewerTransform() {
 
+    const actualScale =
+        viewerBaseScale * viewerScale;
+
     viewerImage.style.transform =
-        `translate3d(${viewerX}px, ${viewerY}px, 0) scale(${viewerScale})`;
+        `translate3d(${viewerX}px, ${viewerY}px, 0)
+         scale(${actualScale})`;
 
 }
-
 // --------------------------------
 // Calculate distance between fingers
 // --------------------------------
