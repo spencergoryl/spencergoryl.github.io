@@ -505,15 +505,7 @@ Definition text
 /* --------------------------------
    Mobile viewer
 -------------------------------- */
-
 @media (max-width: 700px) {
-
-    #viewer-image {
-
-        max-width: 94vw;
-        max-height: 88vh;
-
-    }
 
     #viewer-close {
 
