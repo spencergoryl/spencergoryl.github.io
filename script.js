@@ -576,7 +576,6 @@ const artItems =
 const isMobile =
     window.matchMedia("(hover: none)").matches;
 
-
 // --------------------------------
 // Artwork Viewer
 // --------------------------------
@@ -589,6 +588,42 @@ const viewerImage =
 
 const viewerClose =
     document.getElementById("viewer-close");
+
+const viewerStage =
+    document.getElementById("viewer-stage");
+
+
+// --------------------------------
+// Viewer state
+// --------------------------------
+
+let viewerScale = 1;
+let viewerBaseScale = 1;
+
+let viewerX = 0;
+let viewerY = 0;
+
+const MIN_ZOOM = 1;
+const MAX_ZOOM = 4;
+
+let lastDistance = null;
+let lastTouchX = null;
+let lastTouchY = null;
+
+
+// --------------------------------
+// Update artwork transform
+// --------------------------------
+
+function updateViewerTransform() {
+
+    const actualScale =
+        viewerBaseScale * viewerScale;
+
+    viewerImage.style.transform =
+        `translate3d(${viewerX}px, ${viewerY}px, 0)
+         scale(${actualScale})`;
+}
 
 
 // --------------------------------
@@ -608,64 +643,67 @@ function openArtwork(artName) {
         );
 
         return;
-
     }
+
+    // --------------------------------
+    // Load image
+    // --------------------------------
 
     viewerImage.onload = () => {
 
-    const imageWidth =
-        viewerImage.naturalWidth;
+        const imageWidth =
+            viewerImage.naturalWidth;
 
-    const imageHeight =
-        viewerImage.naturalHeight;
+        const imageHeight =
+            viewerImage.naturalHeight;
 
-    const stageWidth =
-        viewerStage.clientWidth;
+        const stageWidth =
+            viewerStage.clientWidth;
 
-    const stageHeight =
-        viewerStage.clientHeight;
+        const stageHeight =
+            viewerStage.clientHeight;
 
-    viewerBaseScale =
-        Math.min(
-            stageWidth / imageWidth,
-            stageHeight / imageHeight
-        );
+        // --------------------------------
+        // Calculate scale needed to fit
+        // the entire artwork on screen
+        // --------------------------------
 
-    viewerScale = 1;
+        viewerBaseScale =
+            Math.min(
+                stageWidth / imageWidth,
+                stageHeight / imageHeight
+            );
 
-    viewerX = 0;
-    viewerY = 0;
-
-    updateViewerTransform();
-
-};
-        // Set the image's initial display size
-        viewerImage.style.width =
-            `${imageWidth * fitScale}px`;
-
-        viewerImage.style.height =
-            `${imageHeight * fitScale}px`;
-
+        // --------------------------------
         // Reset viewer
+        // --------------------------------
+
         viewerScale = 1;
 
         viewerX = 0;
         viewerY = 0;
 
         updateViewerTransform();
-
     };
 
-    viewerImage.src = imagePath;
+
+    viewerImage.src =
+        imagePath;
 
     viewerImage.alt =
         artName.replace(/-/g, " ");
 
+    // --------------------------------
+    // Show viewer
+    // --------------------------------
+
     artViewer.classList.add("open");
 
-    document.body.style.overflow = "hidden";
-
+    document.body.style.overflow =
+        "hidden";
 }
+
+
 // --------------------------------
 // Close artwork
 // --------------------------------
@@ -678,26 +716,26 @@ function closeViewer() {
 
     viewerImage.src = "";
 
-    viewerImage.style.width = "";
-    viewerImage.style.height = "";
-
     viewerScale = 1;
+
+    viewerBaseScale = 1;
 
     viewerX = 0;
     viewerY = 0;
 
-    updateViewerTransform();
-
+    viewerImage.style.transform =
+        "translate3d(0, 0, 0) scale(1)";
 }
+
+
 // --------------------------------
-// Artwork buttons
+// Artwork navigation
 // --------------------------------
 
 artItems.forEach(item => {
 
     const button =
         item.querySelector(".art-button");
-
 
     button.addEventListener(
         "click",
@@ -713,17 +751,18 @@ artItems.forEach(item => {
 
             if (isMobile) {
 
-                // First tap reveals the title
+                // First tap reveals title
 
                 if (
-                    !item.classList.contains("focused")
+                    !item.classList.contains(
+                        "focused"
+                    )
                 ) {
 
                     event.preventDefault();
 
-
                     // Remove focus from
-                    // every other title
+                    // other titles
 
                     artItems.forEach(
                         otherItem => {
@@ -735,12 +774,9 @@ artItems.forEach(item => {
                                 otherItem.classList.remove(
                                     "focused"
                                 );
-
                             }
-
                         }
                     );
-
 
                     // Reveal this title
 
@@ -749,9 +785,7 @@ artItems.forEach(item => {
                     );
 
                     return;
-
                 }
-
             }
 
 
@@ -793,11 +827,12 @@ document.addEventListener(
         ) {
 
             closeViewer();
-
         }
 
     }
 );
+
+
 // --------------------------------
 // ENGRAM Definition
 // --------------------------------
@@ -810,73 +845,66 @@ const engramDefinition =
 
 let definitionTimer;
 
-engramTrigger.addEventListener("click", () => {
+engramTrigger.addEventListener(
+    "click",
+    () => {
 
-    // Clear any previous timer
-    clearTimeout(definitionTimer);
+        // Clear previous timer
 
-    // Show definition
-    engramDefinition.classList.add("visible");
+        clearTimeout(
+            definitionTimer
+        );
 
-    // Hide after 4 seconds
-    definitionTimer = setTimeout(() => {
+        // Show definition
 
-        engramDefinition.classList.remove("visible");
+        engramDefinition.classList.add(
+            "visible"
+        );
 
-    }, 4000);
+        // Hide after 4 seconds
 
-});
+        definitionTimer =
+            setTimeout(
+                () => {
+
+                    engramDefinition.classList.remove(
+                        "visible"
+                    );
+
+                },
+                4000
+            );
+
+    }
+);
+
+
 // --------------------------------
 // Mobile Artwork Zoom & Pan
 // --------------------------------
 
-const viewerStage =
-    document.getElementById("viewer-stage");
 
-let viewerScale = 1;
-let viewerBaseScale = 1;
-
-let viewerX = 0;
-let viewerY = 0;
-
-const MIN_ZOOM = 1;
-const MAX_ZOOM = 4;
-
-let lastDistance = null;
-let lastTouchX = null;
-let lastTouchY = null;
-
-
-// --------------------------------
-// Update artwork transform
-// --------------------------------
-
-function updateViewerTransform() {
-
-    const actualScale =
-        viewerBaseScale * viewerScale;
-
-    viewerImage.style.transform =
-        `translate3d(${viewerX}px, ${viewerY}px, 0)
-         scale(${actualScale})`;
-
-}
 // --------------------------------
 // Calculate distance between fingers
 // --------------------------------
 
-function getTouchDistance(touch1, touch2) {
+function getTouchDistance(
+    touch1,
+    touch2
+) {
 
     const dx =
-        touch2.clientX - touch1.clientX;
+        touch2.clientX -
+        touch1.clientX;
 
     const dy =
-        touch2.clientY - touch1.clientY;
+        touch2.clientY -
+        touch1.clientY;
 
     return Math.sqrt(
-        dx * dx + dy * dy
+        dx * dx +
+        dy * dy
     );
-
 }
 
 
@@ -890,7 +918,14 @@ viewerStage.addEventListener(
 
         event.preventDefault();
 
-        if (event.touches.length === 2) {
+
+        // --------------------------------
+        // Two fingers
+        // --------------------------------
+
+        if (
+            event.touches.length === 2
+        ) {
 
             lastDistance =
                 getTouchDistance(
@@ -898,20 +933,29 @@ viewerStage.addEventListener(
                     event.touches[1]
                 );
 
+            return;
         }
 
-        if (event.touches.length === 1) {
+
+        // --------------------------------
+        // One finger
+        // --------------------------------
+
+        if (
+            event.touches.length === 1
+        ) {
 
             lastTouchX =
                 event.touches[0].clientX;
 
             lastTouchY =
                 event.touches[0].clientY;
-
         }
 
     },
-    { passive: false }
+    {
+        passive: false
+    }
 );
 
 
@@ -925,80 +969,111 @@ viewerStage.addEventListener(
 
         event.preventDefault();
 
-// -------------------------
-// Pinch zoom
-// -------------------------
 
-if (event.touches.length === 2) {
+        // =================================
+        // PINCH ZOOM
+        // =================================
 
-    const distance =
-        getTouchDistance(
-            event.touches[0],
-            event.touches[1]
-        );
+        if (
+            event.touches.length === 2
+        ) {
 
-    if (lastDistance !== null) {
+            const distance =
+                getTouchDistance(
+                    event.touches[0],
+                    event.touches[1]
+                );
 
-        const zoomAmount =
-            distance / lastDistance;
 
-        const previousScale =
-            viewerScale;
+            if (
+                lastDistance !== null
+            ) {
 
-        viewerScale *= zoomAmount;
+                const zoomAmount =
+                    distance /
+                    lastDistance;
 
-        viewerScale =
-            Math.max(
-                MIN_ZOOM,
-                Math.min(
-                    MAX_ZOOM,
-                    viewerScale
-                )
-            );
+                const previousScale =
+                    viewerScale;
 
-        // --------------------------------
-        // Zooming out
-        // Gradually return toward center
-        // --------------------------------
 
-        if (viewerScale < previousScale) {
+                // --------------------------------
+                // Apply zoom
+                // --------------------------------
 
-            const centeringAmount =
-                0.12;
+                viewerScale *=
+                    zoomAmount;
 
-            viewerX *=
-                1 - centeringAmount;
 
-            viewerY *=
-                1 - centeringAmount;
+                // --------------------------------
+                // Limit zoom
+                // --------------------------------
 
+                viewerScale =
+                    Math.max(
+                        MIN_ZOOM,
+                        Math.min(
+                            MAX_ZOOM,
+                            viewerScale
+                        )
+                    );
+
+
+                // --------------------------------
+                // Zooming OUT
+                // gradually return toward center
+                // --------------------------------
+
+                if (
+                    viewerScale <
+                    previousScale
+                ) {
+
+                    const centeringAmount =
+                        0.12;
+
+                    viewerX *=
+                        1 -
+                        centeringAmount;
+
+                    viewerY *=
+                        1 -
+                        centeringAmount;
+                }
+
+
+                // --------------------------------
+                // Fully centered at 1×
+                // --------------------------------
+
+                if (
+                    viewerScale <= MIN_ZOOM
+                ) {
+
+                    viewerScale =
+                        MIN_ZOOM;
+
+                    viewerX = 0;
+                    viewerY = 0;
+                }
+
+
+                updateViewerTransform();
+            }
+
+
+            lastDistance =
+                distance;
+
+            return;
         }
 
-        // --------------------------------
-        // Fully centered at minimum zoom
-        // --------------------------------
 
-        if (viewerScale <= MIN_ZOOM) {
+        // =================================
+        // ONE FINGER PAN
+        // =================================
 
-            viewerScale = MIN_ZOOM;
-
-            viewerX = 0;
-            viewerY = 0;
-
-        }
-
-        updateViewerTransform();
-
-    }
-
-    lastDistance = distance;
-
-}
-        // -------------------------
-        // One finger pan
-        // -------------------------
-
-        else if (
+        if (
             event.touches.length === 1 &&
             viewerScale > 1
         ) {
@@ -1012,28 +1087,32 @@ if (event.touches.length === 2) {
             const y =
                 touch.clientY;
 
+
             if (
                 lastTouchX !== null &&
                 lastTouchY !== null
             ) {
 
                 viewerX +=
-                    x - lastTouchX;
+                    x -
+                    lastTouchX;
 
                 viewerY +=
-                    y - lastTouchY;
+                    y -
+                    lastTouchY;
 
                 updateViewerTransform();
-
             }
+
 
             lastTouchX = x;
             lastTouchY = y;
-
         }
 
     },
-    { passive: false }
+    {
+        passive: false
+    }
 );
 
 
@@ -1047,7 +1126,10 @@ viewerStage.addEventListener(
 
         lastDistance = null;
 
-        if (event.touches.length === 1) {
+
+        if (
+            event.touches.length === 1
+        ) {
 
             lastTouchX =
                 event.touches[0].clientX;
@@ -1059,9 +1141,10 @@ viewerStage.addEventListener(
 
             lastTouchX = null;
             lastTouchY = null;
-
         }
 
     },
-    { passive: false }
+    {
+        passive: false
+    }
 );
