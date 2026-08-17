@@ -519,17 +519,18 @@ Definition text
 The Brief
 -------------------------------- */
 
-#brief-item {
-    grid-column: 1 / -1;
+#art-navigation.visible #brief-item {
     opacity: 0;
     pointer-events: none;
+    transform: translateY(6px);
 }
 
-/* Reveal The Brief */
+/* Reveal The Brief after all artwork has been opened */
 
-#brief-item.visible {
+#art-navigation.visible #brief-item.visible {
     opacity: 1;
     pointer-events: auto;
+    transform: translateY(0);
 }
 
 /* Brief viewer content */
