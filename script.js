@@ -17,6 +17,7 @@ const artworkPaths = {
 
 };
 
+const openedArtworks = new Set();
 
 // --------------------------------
 // Preload artwork
@@ -840,7 +841,17 @@ function openArtwork(artName) {
 
     }
 
+// Remember that this artwork has been opened
+openedArtworks.add(artName);
 
+// Reveal The Brief once all four artworks have been opened
+if (openedArtworks.size === 4) {
+
+    document
+        .getElementById("brief-item")
+        .classList.add("visible");
+
+}
     // --------------------------------
     // Reset viewer
     // --------------------------------
@@ -1059,6 +1070,24 @@ artItems.forEach(item => {
 
 });
 
+// --------------------------------
+// The Brief
+// --------------------------------
+
+const briefButton =
+    document.getElementById("brief-button");
+
+briefButton.addEventListener(
+    "click",
+    () => {
+
+        artViewer.classList.add("open");
+        artViewer.classList.add("brief-open");
+
+        document.body.style.overflow = "hidden";
+
+    }
+);
 
 // ================================================
 // CLOSE BUTTON
