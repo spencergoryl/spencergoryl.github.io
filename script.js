@@ -987,43 +987,415 @@ function closeViewer() {
 }
 
 // --------------------------------
-// Artwork & Brief Navigation
+// Artwork Navigation
 // --------------------------------
 
-artItems.forEach(item => {
+const artItems =
+    document.querySelectorAll(".art-item");
 
-    const button =
-        item.querySelector(".art-button");
+const artButtons =
+    document.querySelectorAll(".art-item:not(#brief-item) .art-button");
 
-    button.addEventListener(
-        "click",
-        event => {
+const briefItem =
+    document.getElementById("brief-item");
 
-            const artName =
-                button.dataset.art;
+const briefButton =
+    document.getElementById("brief-button");
+
+const isMobile =
+    window.matchMedia("(hover: none)").matches;
 
 
-            // --------------------------------
-            // Mobile
-            // --------------------------------
+// --------------------------------
+// Artwork Viewer
+// --------------------------------
 
-            if (isMobile) {
+const artViewer =
+    document.getElementById("art-viewer");
 
-                /*
-                First tap:
-                reveal the title.
-                */
+const viewerStage =
+    document.getElementById("viewer-stage");
+
+const viewerImage =
+    document.getElementById("viewer-image");
+
+const viewerClose =
+    document.getElementById("viewer-close");
+
+const briefContent =
+    document.getElementById("brief-content");
+
+
+// --------------------------------
+// Track opened artwork
+// --------------------------------
+
+const openedArtworks =
+    new Set();
+
+
+// --------------------------------
+// Viewer state
+// --------------------------------
+
+let viewerScale = 1;
+
+let viewerBaseScale = 1;
+
+let viewerX = 0;
+let viewerY = 0;
+
+const MIN_ZOOM = 1;
+const MAX_ZOOM = 4;
+
+
+// --------------------------------
+// Touch state
+// --------------------------------
+
+let lastDistance = null;
+
+let lastTouchX = null;
+let lastTouchY = null;
+
+
+// --------------------------------
+// Desktop zoom state
+// --------------------------------
+
+let wheelZoomTimeout = null;
+
+
+// --------------------------------
+// Update viewer transform
+// --------------------------------
+
+function updateViewerTransform() {
+
+    const actualScale =
+        viewerBaseScale * viewerScale;
+
+    viewerImage.style.transform =
+        `translate3d(
+            ${viewerX}px,
+            ${viewerY}px,
+            0
+        )
+        scale(${actualScale})`;
+
+}
+
+
+// --------------------------------
+// Reset viewer position
+// --------------------------------
+
+function resetViewerPosition() {
+
+    viewerScale = 1;
+
+    viewerX = 0;
+    viewerY = 0;
+
+    updateViewerTransform();
+
+}
+
+
+// --------------------------------
+// Calculate image fit
+// --------------------------------
+
+function calculateBaseScale() {
+
+    const imageWidth =
+        viewerImage.naturalWidth;
+
+    const imageHeight =
+        viewerImage.naturalHeight;
+
+    const stageWidth =
+        viewerStage.clientWidth;
+
+    const stageHeight =
+        viewerStage.clientHeight;
+
+    if (
+        !imageWidth ||
+        !imageHeight ||
+        !stageWidth ||
+        !stageHeight
+    ) {
+
+        viewerBaseScale = 1;
+
+        return;
+    }
+
+
+    /*
+    Fit the entire artwork inside
+    the viewer while keeping it large.
+
+    The 0.94 gives the image a small
+    breathing room around the edges.
+    */
+
+    viewerBaseScale =
+        Math.min(
+            stageWidth / imageWidth,
+            stageHeight / imageHeight
+        ) * 0.94;
+
+}
+
+
+// --------------------------------
+// Open artwork
+// --------------------------------
+
+function openArtwork(artName) {
+
+    const imagePath =
+        artworkPaths[artName];
+
+    if (!imagePath) {
+
+        console.error(
+            "Artwork not found:",
+            artName
+        );
+
+        return;
+    }
+
+
+    // --------------------------------
+    // Close Brief state if necessary
+    // --------------------------------
+
+    artViewer.classList.remove(
+        "brief-open"
+    );
+
+
+    // --------------------------------
+    // Show artwork stage
+    // --------------------------------
+
+    viewerStage.style.visibility =
+        "visible";
+
+
+    // --------------------------------
+    // Reset viewer before loading
+    // --------------------------------
+
+    viewerScale = 1;
+
+    viewerX = 0;
+    viewerY = 0;
+
+
+    // --------------------------------
+    // Load artwork
+    // --------------------------------
+
+    viewerImage.onload = () => {
+
+        calculateBaseScale();
+
+        resetViewerPosition();
+
+    };
+
+
+    viewerImage.src =
+        imagePath;
+
+    viewerImage.alt =
+        artName.replace(
+            /-/g,
+            " "
+        );
+
+
+    // --------------------------------
+    // Show viewer
+    // --------------------------------
+
+    artViewer.classList.add(
+        "open"
+    );
+
+    document.body.style.overflow =
+        "hidden";
+
+
+    // --------------------------------
+    // Remember artwork
+    // --------------------------------
+
+    openedArtworks.add(
+        artName
+    );
+
+
+    // --------------------------------
+    // Check whether all four
+    // artworks have been opened
+    // --------------------------------
+
+    checkBriefUnlock();
+
+}
+
+
+// --------------------------------
+// Check Brief unlock
+// --------------------------------
+
+function checkBriefUnlock() {
+
+    const artworkCount =
+        Object.keys(
+            artworkPaths
+        ).length;
+
+    if (
+        openedArtworks.size >=
+        artworkCount
+    ) {
+
+        briefItem.classList.add(
+            "visible"
+        );
+
+    }
+
+}
+
+
+// --------------------------------
+// Open The Brief
+// --------------------------------
+
+function openBrief() {
+
+    // --------------------------------
+    // Make sure the viewer is open
+    // --------------------------------
+
+    artViewer.classList.add(
+        "open"
+    );
+
+
+    // --------------------------------
+    // Hide artwork stage
+    // --------------------------------
+
+    viewerStage.style.visibility =
+        "hidden";
+
+
+    // --------------------------------
+    // Show Brief
+    // --------------------------------
+
+    artViewer.classList.add(
+        "brief-open"
+    );
+
+
+    document.body.style.overflow =
+        "hidden";
+
+}
+
+
+// --------------------------------
+// Close viewer
+// --------------------------------
+
+function closeViewer() {
+
+    artViewer.classList.remove(
+        "open"
+    );
+
+    artViewer.classList.remove(
+        "brief-open"
+    );
+
+
+    viewerStage.style.visibility =
+        "visible";
+
+
+    document.body.style.overflow =
+        "";
+
+
+    viewerImage.src = "";
+
+
+    viewerScale = 1;
+
+    viewerBaseScale = 1;
+
+    viewerX = 0;
+    viewerY = 0;
+
+
+    viewerImage.style.transform =
+        "translate3d(0, 0, 0) scale(1)";
+
+
+    lastDistance = null;
+
+    lastTouchX = null;
+    lastTouchY = null;
+
+}
+
+
+// --------------------------------
+// Artwork button interaction
+// --------------------------------
+
+artButtons.forEach(
+    button => {
+
+        button.addEventListener(
+            "click",
+            event => {
+
+                const item =
+                    button.closest(
+                        ".art-item"
+                    );
+
+                const artName =
+                    button.dataset.art;
+
+
+                // --------------------------------
+                // Mobile first tap
+                // --------------------------------
 
                 if (
-                    !item.classList.contains("focused")
+                    isMobile &&
+                    !item.classList.contains(
+                        "focused"
+                    )
                 ) {
 
                     event.preventDefault();
 
-                    /*
-                    Remove focus from
-                    every other item.
-                    */
+
+                    // Remove focus
+                    // from all other items
 
                     artItems.forEach(
                         otherItem => {
@@ -1042,103 +1414,98 @@ artItems.forEach(item => {
                     );
 
 
-                    /*
-                    Focus this item.
-                    */
+                    // Focus this item
 
                     item.classList.add(
                         "focused"
                     );
 
+
                     return;
 
                 }
 
-            }
 
+                // --------------------------------
+                // Desktop click
+                // OR
+                // Mobile second tap
+                // --------------------------------
 
-            // --------------------------------
-            // Second tap / desktop click
-            // --------------------------------
-
-            /*
-            If this is The Brief,
-            open the brief instead of artwork.
-            */
-
-            if (
-                item.id === "brief-item"
-            ) {
-
-                openBrief();
-
-                return;
+                openArtwork(
+                    artName
+                );
 
             }
-
-
-            // --------------------------------
-            // Artwork
-            // --------------------------------
-
-            if (artName) {
-
-                openArtwork(artName);
-
-            }
-
-        }
-    );
-
-});
-            // --------------------------------
-            // Open artwork
-            // --------------------------------
-
-            openArtwork(
-                artName
-            );
-
-        }
-    );
-
-});
-
-// --------------------------------
-// Open The Brief
-// --------------------------------
-
-function openBrief() {
-
-    artViewer.classList.add("open");
-    artViewer.classList.add("brief-open");
-
-    document.body.style.overflow = "hidden";
-
-}
-
-// --------------------------------
-// The Brief
-// --------------------------------
-
-const briefButton =
-    document.getElementById("brief-button");
-
-briefButton.addEventListener(
-    "click",
-    () => {
-
-        artViewer.classList.add("open");
-        artViewer.classList.add("brief-open");
-
-        document.body.style.overflow = "hidden";
+        );
 
     }
 );
 
-// ================================================
-// CLOSE BUTTON
-// ================================================
+
+// --------------------------------
+// The Brief button
+// --------------------------------
+
+briefButton.addEventListener(
+    "click",
+    event => {
+
+        // --------------------------------
+        // Mobile first tap
+        // --------------------------------
+
+        if (
+            isMobile &&
+            !briefItem.classList.contains(
+                "focused"
+            )
+        ) {
+
+            event.preventDefault();
+
+
+            // Remove focus from
+            // artwork buttons
+
+            artItems.forEach(
+                item => {
+
+                    item.classList.remove(
+                        "focused"
+                    );
+
+                }
+            );
+
+
+            // Focus The Brief
+
+            briefItem.classList.add(
+                "focused"
+            );
+
+
+            return;
+
+        }
+
+
+        // --------------------------------
+        // Desktop click
+        // OR
+        // Mobile second tap
+        // --------------------------------
+
+        openBrief();
+
+    }
+);
+
+
+// --------------------------------
+// Close button
+// --------------------------------
 
 viewerClose.addEventListener(
     "click",
@@ -1146,9 +1513,9 @@ viewerClose.addEventListener(
 );
 
 
-// ================================================
-// ESCAPE KEY
-// ================================================
+// --------------------------------
+// Escape key
+// --------------------------------
 
 document.addEventListener(
     "keydown",
@@ -1169,9 +1536,9 @@ document.addEventListener(
 );
 
 
-// ================================================
-// ENGRAM DEFINITION
-// ================================================
+// --------------------------------
+// ENGRAM Definition
+// --------------------------------
 
 const engramTrigger =
     document.getElementById(
@@ -1186,50 +1553,38 @@ const engramDefinition =
 let definitionTimer;
 
 
-if (
-    engramTrigger &&
-    engramDefinition
-) {
+engramTrigger.addEventListener(
+    "click",
+    () => {
 
-    engramTrigger.addEventListener(
-        "click",
-        () => {
+        clearTimeout(
+            definitionTimer
+        );
 
-            clearTimeout(
-                definitionTimer
+
+        engramDefinition.classList.add(
+            "visible"
+        );
+
+
+        definitionTimer =
+            setTimeout(
+                () => {
+
+                    engramDefinition.classList.remove(
+                        "visible"
+                    );
+
+                },
+                4000
             );
 
-
-            engramDefinition.classList.add(
-                "visible"
-            );
-
-
-            definitionTimer =
-                setTimeout(
-                    () => {
-
-                        engramDefinition.classList.remove(
-                            "visible"
-                        );
-
-                    },
-                    4000
-                );
-
-        }
-    );
-
-}
-
-
-// ================================================
-// MOBILE PINCH ZOOM
-// ================================================
+    }
+);
 
 
 // --------------------------------
-// Calculate distance between fingers
+// Touch helpers
 // --------------------------------
 
 function getTouchDistance(
@@ -1244,7 +1599,6 @@ function getTouchDistance(
     const dy =
         touch2.clientY -
         touch1.clientY;
-
 
     return Math.sqrt(
         dx * dx +
@@ -1265,7 +1619,9 @@ viewerStage.addEventListener(
         event.preventDefault();
 
 
+        // --------------------------------
         // Two fingers
+        // --------------------------------
 
         if (
             event.touches.length === 2
@@ -1277,12 +1633,17 @@ viewerStage.addEventListener(
                     event.touches[1]
                 );
 
+            lastTouchX = null;
+            lastTouchY = null;
+
             return;
 
         }
 
 
+        // --------------------------------
         // One finger
+        // --------------------------------
 
         if (
             event.touches.length === 1
@@ -1352,9 +1713,10 @@ viewerStage.addEventListener(
                     );
 
 
-                // --------------------------------
-                // Center when completely zoomed out
-                // --------------------------------
+                /*
+                When returning to 1×,
+                completely recenter the image.
+                */
 
                 if (
                     viewerScale <= MIN_ZOOM
@@ -1394,7 +1756,6 @@ viewerStage.addEventListener(
             const touch =
                 event.touches[0];
 
-
             const x =
                 touch.clientX;
 
@@ -1421,11 +1782,8 @@ viewerStage.addEventListener(
             }
 
 
-            lastTouchX =
-                x;
-
-            lastTouchY =
-                y;
+            lastTouchX = x;
+            lastTouchY = y;
 
         }
 
@@ -1444,8 +1802,7 @@ viewerStage.addEventListener(
     "touchend",
     event => {
 
-        lastDistance =
-            null;
+        lastDistance = null;
 
 
         if (
@@ -1460,11 +1817,8 @@ viewerStage.addEventListener(
 
         } else {
 
-            lastTouchX =
-                null;
-
-            lastTouchY =
-                null;
+            lastTouchX = null;
+            lastTouchY = null;
 
         }
 
@@ -1474,8 +1828,9 @@ viewerStage.addEventListener(
     }
 );
 
+
 // --------------------------------
-// Desktop Zoom
+// Desktop / Trackpad zoom
 // --------------------------------
 
 viewerStage.addEventListener(
@@ -1483,40 +1838,34 @@ viewerStage.addEventListener(
     event => {
 
         /*
-        Don't zoom while The Brief is open.
+        Prevent the page from scrolling
+        while the artwork viewer is open.
         */
-
-        if (
-            artViewer.classList.contains("brief-open")
-        ) {
-
-            return;
-
-        }
 
         event.preventDefault();
 
 
-        /*
-        Trackpad / mouse wheel direction
-        */
+        // --------------------------------
+        // Convert wheel movement
+        // into zoom amount
+        // --------------------------------
+
+        const zoomSpeed = 0.0025;
 
         const zoomAmount =
-            event.deltaY < 0
-                ? 1.08
-                : 0.92;
+            Math.exp(
+                -event.deltaY *
+                zoomSpeed
+            );
 
 
-        const previousScale =
-            viewerScale;
+        viewerScale *=
+            zoomAmount;
 
 
-        viewerScale *= zoomAmount;
-
-
-        /*
-        Limit zoom
-        */
+        // --------------------------------
+        // Limit zoom
+        // --------------------------------
 
         viewerScale =
             Math.max(
@@ -1528,10 +1877,9 @@ viewerStage.addEventListener(
             );
 
 
-        /*
-        When returning to 1×,
-        always center the artwork.
-        */
+        // --------------------------------
+        // Return to center at 1×
+        // --------------------------------
 
         if (
             viewerScale <= MIN_ZOOM
@@ -1546,27 +1894,28 @@ viewerStage.addEventListener(
         }
 
 
-        /*
-        Gradually return toward center
-        while zooming out.
-        */
-
-        else if (
-            viewerScale < previousScale
-        ) {
-
-            const centeringAmount = 0.12;
-
-            viewerX *=
-                1 - centeringAmount;
-
-            viewerY *=
-                1 - centeringAmount;
-
-        }
-
-
         updateViewerTransform();
+
+
+        // --------------------------------
+        // Prevent excessive wheel events
+        // from accumulating strangely
+        // --------------------------------
+
+        clearTimeout(
+            wheelZoomTimeout
+        );
+
+        wheelZoomTimeout =
+            setTimeout(
+                () => {
+
+                    wheelZoomTimeout =
+                        null;
+
+                },
+                50
+            );
 
     },
     {
@@ -1574,80 +1923,30 @@ viewerStage.addEventListener(
     }
 );
 
+
 // --------------------------------
-// Desktop Pan
+// Prevent browser double-tap zoom
 // --------------------------------
 
-let mouseDown = false;
-
-let lastMouseX = 0;
-let lastMouseY = 0;
-
-
-viewerStage.addEventListener(
-    "mousedown",
+document.addEventListener(
+    "dblclick",
     event => {
 
         if (
-            viewerScale <= 1 ||
-            artViewer.classList.contains("brief-open")
+            event.target.closest(
+                ".art-button"
+            ) ||
+            event.target.closest(
+                "#brief-button"
+            ) ||
+            event.target.closest(
+                "#viewer-stage"
+            )
         ) {
 
-            return;
+            event.preventDefault();
 
         }
-
-        mouseDown = true;
-
-        lastMouseX =
-            event.clientX;
-
-        lastMouseY =
-            event.clientY;
-
-    }
-);
-
-
-viewerStage.addEventListener(
-    "mousemove",
-    event => {
-
-        if (!mouseDown) {
-            return;
-        }
-
-        const dx =
-            event.clientX -
-            lastMouseX;
-
-        const dy =
-            event.clientY -
-            lastMouseY;
-
-
-        viewerX += dx;
-        viewerY += dy;
-
-
-        lastMouseX =
-            event.clientX;
-
-        lastMouseY =
-            event.clientY;
-
-
-        updateViewerTransform();
-
-    }
-);
-
-
-window.addEventListener(
-    "mouseup",
-    () => {
-
-        mouseDown = false;
 
     }
 );
