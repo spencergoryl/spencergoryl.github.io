@@ -14,10 +14,14 @@ const artworkPaths = {
 // ELEMENTS
 // ================================================================
 
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
+const canvas =
+    document.getElementById("canvas");
 
-const navigation = document.getElementById("art-navigation");
+const ctx =
+    canvas.getContext("2d");
+
+const navigation =
+    document.getElementById("art-navigation");
 
 const engramTrigger =
     document.getElementById("engram-trigger");
@@ -45,46 +49,79 @@ const briefButton =
 
 
 // ================================================================
-// NAVIGATION
+// NAVIGATION ELEMENTS
 // ================================================================
 
 const artButtons =
     document.querySelectorAll(
-        "#art-navigation .art-item:not(#brief-item) .art-button"
+        ".art-item:not(#brief-item) .art-button"
     );
 
 const artItems =
     document.querySelectorAll(
-        "#art-navigation .art-item"
+        ".art-item"
     );
 
 
 // ================================================================
-// DEVICE
+// DEVICE DETECTION
 // ================================================================
 
-const isTouchDevice =
-    window.matchMedia("(hover: none)").matches;
+const isMobile =
+    window.matchMedia(
+        "(hover: none)"
+    ).matches;
 
 
 // ================================================================
-// TRACK WHICH ARTWORKS HAVE BEEN OPENED
+// TRACK OPENED ARTWORKS
 // ================================================================
 
-const openedArtworks = new Set();
+const openedArtworks =
+    new Set();
+
+
+// ================================================================
+// BRIEF STATE
+// ================================================================
+
+let briefUnlocked = false;
 
 
 // ================================================================
 // PRELOAD ARTWORK
 // ================================================================
 
-Object.values(artworkPaths).forEach(path => {
+Object.values(artworkPaths).forEach(
+    path => {
 
-    const image = new Image();
+        const image =
+            new Image();
 
-    image.src = path;
+        image.src =
+            path;
 
-});
+    }
+);
+
+
+// ================================================================
+// FORCE THE BRIEF HIDDEN INITIALLY
+// ================================================================
+//
+// Your CSS contains:
+//
+// #art-navigation.visible .art-item
+//
+// which makes every art-item visible once navigation
+// becomes visible. We override that specifically for
+// The Brief until all artwork has been opened.
+// ================================================================
+
+briefItem.style.opacity = "0";
+briefItem.style.pointerEvents = "none";
+briefItem.style.transform =
+    "translateY(6px)";
 
 
 // ================================================================
@@ -92,6 +129,10 @@ Object.values(artworkPaths).forEach(path => {
 // ================================================================
 
 document.fonts.ready.then(() => {
+
+    // ------------------------------------------------------------
+    // Canvas setup
+    // ------------------------------------------------------------
 
     const dpr =
         Math.min(
@@ -130,7 +171,7 @@ document.fonts.ready.then(() => {
 
 
     // ------------------------------------------------------------
-    // Animation settings
+    // Animation controls
     // ------------------------------------------------------------
 
     const PARTICLE_COUNT = 1200;
@@ -173,7 +214,7 @@ document.fonts.ready.then(() => {
 
 
     // ------------------------------------------------------------
-    // Text canvas
+    // Text mask
     // ------------------------------------------------------------
 
     const textCanvas =
@@ -314,15 +355,20 @@ document.fonts.ready.then(() => {
     // Animation state
     // ------------------------------------------------------------
 
-    let phase = "forming";
+    let phase =
+        "forming";
 
-    let phaseTime = 0;
+    let phaseTime =
+        0;
 
-    let meltProgress = 0;
+    let meltProgress =
+        0;
 
-    let fontSettleProgress = 0;
+    let fontSettleProgress =
+        0;
 
-    let particleContractProgress = 0;
+    let particleContractProgress =
+        0;
 
     let lastTime =
         performance.now();
@@ -335,9 +381,14 @@ document.fonts.ready.then(() => {
     function easeInOut(t) {
 
         return t < 0.5
+
             ? 2 * t * t
+
             : 1 -
-              Math.pow(-2 * t + 2, 2) / 2;
+              Math.pow(
+                  -2 * t + 2,
+                  2
+              ) / 2;
 
     }
 
@@ -368,7 +419,6 @@ document.fonts.ready.then(() => {
         lastTime =
             currentTime;
 
-
         const dt =
             deltaTime / 1000;
 
@@ -397,7 +447,8 @@ document.fonts.ready.then(() => {
                     -FOLLOW_SPEED * 60 * dt
                 );
 
-            let totalDistanceSquared = 0;
+            let totalDistanceSquared =
+                0;
 
 
             for (
@@ -446,7 +497,8 @@ document.fonts.ready.then(() => {
                     phase =
                         "holding";
 
-                    phaseTime = 0;
+                    phaseTime =
+                        0;
 
                 }
 
@@ -467,13 +519,15 @@ document.fonts.ready.then(() => {
                 deltaTime;
 
             if (
-                phaseTime >= HOLD_TIME
+                phaseTime >=
+                HOLD_TIME
             ) {
 
                 phase =
                     "melting";
 
-                phaseTime = 0;
+                phaseTime =
+                    0;
 
             }
 
@@ -503,7 +557,8 @@ document.fonts.ready.then(() => {
                 phase =
                     "resolving";
 
-                phaseTime = 0;
+                phaseTime =
+                    0;
 
             }
 
@@ -556,7 +611,8 @@ document.fonts.ready.then(() => {
         // Particle expansion
         // --------------------------------------------------------
 
-        let expansion = 0;
+        let expansion =
+            0;
 
         if (
             phase === "melting"
@@ -575,7 +631,8 @@ document.fonts.ready.then(() => {
         // Font scale
         // --------------------------------------------------------
 
-        let fontScale = 0;
+        let fontScale =
+            0;
 
         if (
             phase === "resolving"
@@ -599,7 +656,8 @@ document.fonts.ready.then(() => {
             phase === "complete"
         ) {
 
-            fontScale = 1;
+            fontScale =
+                1;
 
         }
 
@@ -762,41 +820,71 @@ document.fonts.ready.then(() => {
 
 
 // ================================================================
-// VIEWER STATE
+// VIEWER VARIABLES
 // ================================================================
 
-let viewerBaseScale = 1;
+let viewerBaseScale =
+    1;
 
-let viewerZoom = 1;
+let viewerZoom =
+    1;
 
-let viewerX = 0;
+let viewerX =
+    0;
 
-let viewerY = 0;
-
-const MIN_ZOOM = 1;
-
-const MAX_ZOOM = 4;
+let viewerY =
+    0;
 
 
-// ================================================================
-// POINTER / TOUCH STATE
-// ================================================================
+const MIN_ZOOM =
+    1;
 
-let isDragging = false;
-
-let dragStartX = 0;
-
-let dragStartY = 0;
-
-let startViewerX = 0;
-
-let startViewerY = 0;
-
-let lastPinchDistance = null;
+const MAX_ZOOM =
+    4;
 
 
 // ================================================================
-// VIEWER TRANSFORM
+// MOUSE DRAG STATE
+// ================================================================
+
+let isDragging =
+    false;
+
+let dragStartX =
+    0;
+
+let dragStartY =
+    0;
+
+let dragOriginX =
+    0;
+
+let dragOriginY =
+    0;
+
+
+// ================================================================
+// TOUCH STATE
+// ================================================================
+
+let lastTouchDistance =
+    null;
+
+let touchStartX =
+    0;
+
+let touchStartY =
+    0;
+
+let touchOriginX =
+    0;
+
+let touchOriginY =
+    0;
+
+
+// ================================================================
+// UPDATE IMAGE TRANSFORM
 // ================================================================
 
 function updateViewerTransform() {
@@ -810,13 +898,14 @@ function updateViewerTransform() {
             ${viewerX}px,
             ${viewerY}px,
             0
-        ) scale(${scale})`;
+        )
+        scale(${scale})`;
 
 }
 
 
 // ================================================================
-// CALCULATE FIT
+// CALCULATE IMAGE FIT
 // ================================================================
 
 function calculateViewerScale() {
@@ -841,7 +930,8 @@ function calculateViewerScale() {
         !stageHeight
     ) {
 
-        viewerBaseScale = 1;
+        viewerBaseScale =
+            1;
 
         return;
 
@@ -849,11 +939,10 @@ function calculateViewerScale() {
 
 
     /*
-    The image remains at its natural dimensions.
-    The transform performs the fitting.
+    Keep the image at its natural dimensions.
 
-    This prevents the tiny-image problem caused by
-    repeatedly changing width/height and then scaling.
+    The transform scales it to fit the viewer.
+    This avoids the tiny-image problem.
     */
 
     viewerBaseScale =
@@ -866,26 +955,30 @@ function calculateViewerScale() {
 
 
 // ================================================================
-// RESET VIEWER
+// RESET VIEWER POSITION
 // ================================================================
 
 function resetViewer() {
 
-    viewerZoom = 1;
+    viewerZoom =
+        1;
 
-    viewerX = 0;
+    viewerX =
+        0;
 
-    viewerY = 0;
+    viewerY =
+        0;
 
-    isDragging = false;
+    isDragging =
+        false;
 
-    lastPinchDistance = null;
+    lastTouchDistance =
+        null;
 
-    viewerImage.style.width =
-        `${viewerImage.naturalWidth}px`;
 
-    viewerImage.style.height =
-        `${viewerImage.naturalHeight}px`;
+    viewerImage.style.cursor =
+        "grab";
+
 
     updateViewerTransform();
 
@@ -915,7 +1008,7 @@ function openArtwork(artName) {
 
 
     // ------------------------------------------------------------
-    // Make sure Brief mode is completely off
+    // Make sure Brief mode is OFF
     // ------------------------------------------------------------
 
     artViewer.classList.remove(
@@ -924,27 +1017,25 @@ function openArtwork(artName) {
 
 
     // ------------------------------------------------------------
-    // Make artwork stage interactive again
+    // Make artwork stage visible
     // ------------------------------------------------------------
 
     viewerStage.style.visibility =
         "visible";
 
-    viewerStage.style.pointerEvents =
-        "auto";
-
 
     // ------------------------------------------------------------
-    // Load artwork
+    // Load image
     // ------------------------------------------------------------
 
-    viewerImage.onload = () => {
+    viewerImage.onload =
+        function() {
 
-        calculateViewerScale();
+            calculateViewerScale();
 
-        resetViewer();
+            resetViewer();
 
-    };
+        };
 
 
     viewerImage.src =
@@ -964,9 +1055,6 @@ function openArtwork(artName) {
     artViewer.classList.add(
         "open"
     );
-
-    artViewer.style.pointerEvents =
-        "auto";
 
 
     document.body.style.overflow =
@@ -1004,9 +1092,24 @@ function checkBriefUnlock() {
         artworkCount
     ) {
 
-        briefItem.classList.add(
-            "visible"
-        );
+        if (
+            !briefUnlocked
+        ) {
+
+            briefUnlocked =
+                true;
+
+
+            briefItem.style.opacity =
+                "1";
+
+            briefItem.style.pointerEvents =
+                "auto";
+
+            briefItem.style.transform =
+                "translateY(0)";
+
+        }
 
     }
 
@@ -1019,14 +1122,8 @@ function checkBriefUnlock() {
 
 function openBrief() {
 
-    /*
-    The Brief should only be accessible
-    after all four artworks have been opened.
-    */
-
     if (
-        openedArtworks.size <
-        Object.keys(artworkPaths).length
+        !briefUnlocked
     ) {
 
         return;
@@ -1046,13 +1143,6 @@ function openBrief() {
     viewerStage.style.visibility =
         "hidden";
 
-    viewerStage.style.pointerEvents =
-        "none";
-
-
-    artViewer.style.pointerEvents =
-        "auto";
-
 
     document.body.style.overflow =
         "hidden";
@@ -1066,6 +1156,26 @@ function openBrief() {
 
 function closeViewer() {
 
+    // ------------------------------------------------------------
+    // Stop dragging first
+    // ------------------------------------------------------------
+
+    isDragging =
+        false;
+
+
+    // ------------------------------------------------------------
+    // Reset cursor
+    // ------------------------------------------------------------
+
+    viewerImage.style.cursor =
+        "grab";
+
+
+    // ------------------------------------------------------------
+    // Remove viewer states
+    // ------------------------------------------------------------
+
     artViewer.classList.remove(
         "open"
     );
@@ -1075,29 +1185,13 @@ function closeViewer() {
     );
 
 
-    /*
-    This is important.
-
-    The viewer itself becomes completely
-    non-interactive when closed, so an invisible
-    full-screen layer can never sit over the
-    navigation buttons.
-    */
-
-    artViewer.style.pointerEvents =
-        "none";
-
-
     viewerStage.style.visibility =
         "visible";
 
-    viewerStage.style.pointerEvents =
-        "auto";
 
-
-    document.body.style.overflow =
-        "";
-
+    // ------------------------------------------------------------
+    // Reset image
+    // ------------------------------------------------------------
 
     viewerImage.onload =
         null;
@@ -1106,115 +1200,112 @@ function closeViewer() {
         "";
 
 
-    viewerZoom = 1;
+    viewerZoom =
+        1;
 
-    viewerBaseScale = 1;
+    viewerBaseScale =
+        1;
 
-    viewerX = 0;
+    viewerX =
+        0;
 
-    viewerY = 0;
+    viewerY =
+        0;
 
-    isDragging = false;
-
-    lastPinchDistance = null;
+    lastTouchDistance =
+        null;
 
 
     viewerImage.style.transform =
         "translate3d(0, 0, 0) scale(1)";
 
+
+    // ------------------------------------------------------------
+    // Restore page
+    // ------------------------------------------------------------
+
+    document.body.style.overflow =
+        "";
+
 }
-
-
-// ================================================================
-// INITIAL VIEWER STATE
-// ================================================================
-
-/*
-Important: the viewer must be completely inert
-before the first artwork is opened.
-*/
-
-artViewer.style.pointerEvents =
-    "none";
-
-viewerStage.style.pointerEvents =
-    "auto";
 
 
 // ================================================================
 // ARTWORK BUTTONS
 // ================================================================
 
-artButtons.forEach(button => {
+artButtons.forEach(
+    button => {
 
-    button.addEventListener(
-        "click",
-        event => {
+        button.addEventListener(
+            "click",
+            event => {
 
-            event.preventDefault();
+                event.preventDefault();
 
-            event.stopPropagation();
-
-
-            const item =
-                button.closest(
-                    ".art-item"
-                );
-
-            const artName =
-                button.dataset.art;
+                event.stopPropagation();
 
 
-            // ----------------------------------------------------
-            // Mobile first tap
-            // ----------------------------------------------------
+                const item =
+                    button.closest(
+                        ".art-item"
+                    );
 
-            if (
-                isTouchDevice &&
-                !item.classList.contains(
-                    "focused"
-                )
-            ) {
+                const artName =
+                    button.dataset.art;
 
-                artItems.forEach(
-                    otherItem => {
 
-                        if (
-                            otherItem !== item
-                        ) {
+                // ------------------------------------------------
+                // Mobile first tap
+                // ------------------------------------------------
 
-                            otherItem.classList.remove(
-                                "focused"
-                            );
+                if (
+                    isMobile &&
+                    !item.classList.contains(
+                        "focused"
+                    )
+                ) {
+
+                    artItems.forEach(
+                        otherItem => {
+
+                            if (
+                                otherItem !== item
+                            ) {
+
+                                otherItem.classList.remove(
+                                    "focused"
+                                );
+
+                            }
 
                         }
+                    );
 
-                    }
+
+                    item.classList.add(
+                        "focused"
+                    );
+
+
+                    return;
+
+                }
+
+
+                // ------------------------------------------------
+                // Desktop click OR mobile second tap
+                // ------------------------------------------------
+
+                openArtwork(
+                    artName
                 );
-
-
-                item.classList.add(
-                    "focused"
-                );
-
-
-                return;
 
             }
+        );
 
-
-            // ----------------------------------------------------
-            // Desktop click OR mobile second tap
-            // ----------------------------------------------------
-
-            openArtwork(
-                artName
-            );
-
-        }
-    );
-
-});
+    }
+);
 
 
 // ================================================================
@@ -1230,14 +1321,8 @@ briefButton.addEventListener(
         event.stopPropagation();
 
 
-        /*
-        Do not allow the Brief to be clicked
-        before it has been unlocked.
-        */
-
         if (
-            openedArtworks.size <
-            Object.keys(artworkPaths).length
+            !briefUnlocked
         ) {
 
             return;
@@ -1250,7 +1335,7 @@ briefButton.addEventListener(
         // --------------------------------------------------------
 
         if (
-            isTouchDevice &&
+            isMobile &&
             !briefItem.classList.contains(
                 "focused"
             )
@@ -1278,7 +1363,7 @@ briefButton.addEventListener(
 
 
         // --------------------------------------------------------
-        // Desktop click OR mobile second tap
+        // Desktop OR mobile second tap
         // --------------------------------------------------------
 
         openBrief();
@@ -1332,7 +1417,9 @@ document.addEventListener(
 // ENGRAM DEFINITION
 // ================================================================
 
-let definitionTimer = null;
+let definitionTimer =
+    null;
+
 
 engramTrigger.addEventListener(
     "click",
@@ -1370,17 +1457,18 @@ engramTrigger.addEventListener(
 
 
 // ================================================================
-// DESKTOP DRAG / GRAB
+// DESKTOP MOUSE DRAG
+// ================================================================
+//
+// We are intentionally using ordinary mouse events here instead
+// of Pointer Events. This keeps the viewer completely separate
+// from the navigation and avoids the persistent grabbing state
+// we were seeing.
 // ================================================================
 
-viewerStage.addEventListener(
-    "pointerdown",
+viewerImage.addEventListener(
+    "mousedown",
     event => {
-
-        /*
-        Only allow grabbing when the artwork
-        is actually zoomed in.
-        */
 
         if (
             viewerZoom <= MIN_ZOOM
@@ -1392,7 +1480,6 @@ viewerStage.addEventListener(
 
 
         if (
-            event.pointerType === "mouse" &&
             event.button !== 0
         ) {
 
@@ -1404,7 +1491,8 @@ viewerStage.addEventListener(
         event.preventDefault();
 
 
-        isDragging = true;
+        isDragging =
+            true;
 
 
         dragStartX =
@@ -1414,16 +1502,11 @@ viewerStage.addEventListener(
             event.clientY;
 
 
-        startViewerX =
+        dragOriginX =
             viewerX;
 
-        startViewerY =
+        dragOriginY =
             viewerY;
-
-
-        viewerStage.setPointerCapture(
-            event.pointerId
-        );
 
 
         viewerImage.style.cursor =
@@ -1434,11 +1517,11 @@ viewerStage.addEventListener(
 
 
 // ================================================================
-// DESKTOP DRAGGING
+// DESKTOP MOUSE MOVE
 // ================================================================
 
-viewerStage.addEventListener(
-    "pointermove",
+document.addEventListener(
+    "mousemove",
     event => {
 
         if (
@@ -1454,7 +1537,7 @@ viewerStage.addEventListener(
 
 
         viewerX =
-            startViewerX +
+            dragOriginX +
             (
                 event.clientX -
                 dragStartX
@@ -1462,7 +1545,7 @@ viewerStage.addEventListener(
 
 
         viewerY =
-            startViewerY +
+            dragOriginY +
             (
                 event.clientY -
                 dragStartY
@@ -1476,283 +1559,29 @@ viewerStage.addEventListener(
 
 
 // ================================================================
-// DESKTOP DRAG END
+// DESKTOP MOUSE UP
 // ================================================================
 
-function endDragging(event) {
-
-    if (
-        !isDragging
-    ) {
-
-        return;
-
-    }
-
-
-    isDragging = false;
-
-
-    viewerImage.style.cursor =
-        "grab";
-
-
-    if (
-        event &&
-        viewerStage.hasPointerCapture(
-            event.pointerId
-        )
-    ) {
-
-        viewerStage.releasePointerCapture(
-            event.pointerId
-        );
-
-    }
-
-}
-
-
-viewerStage.addEventListener(
-    "pointerup",
-    endDragging
-);
-
-viewerStage.addEventListener(
-    "pointercancel",
-    endDragging
-);
-
-
-// ================================================================
-// TOUCH PINCH ZOOM
-// ================================================================
-
-function getTouchDistance(
-    touch1,
-    touch2
-) {
-
-    const dx =
-        touch2.clientX -
-        touch1.clientX;
-
-    const dy =
-        touch2.clientY -
-        touch1.clientY;
-
-
-    return Math.sqrt(
-        dx * dx +
-        dy * dy
-    );
-
-}
-
-
-// ================================================================
-// TOUCH START
-// ================================================================
-
-viewerStage.addEventListener(
-    "touchstart",
-    event => {
-
-        event.preventDefault();
-
-
-        // --------------------------------------------------------
-        // Pinch
-        // --------------------------------------------------------
+document.addEventListener(
+    "mouseup",
+    () => {
 
         if (
-            event.touches.length === 2
+            !isDragging
         ) {
-
-            lastPinchDistance =
-                getTouchDistance(
-                    event.touches[0],
-                    event.touches[1]
-                );
 
             return;
 
         }
 
 
-        // --------------------------------------------------------
-        // One finger
-        // --------------------------------------------------------
-
-        if (
-            event.touches.length === 1 &&
-            viewerZoom > MIN_ZOOM
-        ) {
-
-            dragStartX =
-                event.touches[0].clientX;
-
-            dragStartY =
-                event.touches[0].clientY;
-
-            startViewerX =
-                viewerX;
-
-            startViewerY =
-                viewerY;
-
-        }
-
-    },
-    {
-        passive: false
-    }
-);
+        isDragging =
+            false;
 
 
-// ================================================================
-// TOUCH MOVE
-// ================================================================
+        viewerImage.style.cursor =
+            "grab";
 
-viewerStage.addEventListener(
-    "touchmove",
-    event => {
-
-        event.preventDefault();
-
-
-        // --------------------------------------------------------
-        // Pinch zoom
-        // --------------------------------------------------------
-
-        if (
-            event.touches.length === 2
-        ) {
-
-            const distance =
-                getTouchDistance(
-                    event.touches[0],
-                    event.touches[1]
-                );
-
-
-            if (
-                lastPinchDistance !== null
-            ) {
-
-                const zoomAmount =
-                    distance /
-                    lastPinchDistance;
-
-
-                viewerZoom *=
-                    zoomAmount;
-
-
-                viewerZoom =
-                    Math.max(
-                        MIN_ZOOM,
-                        Math.min(
-                            MAX_ZOOM,
-                            viewerZoom
-                        )
-                    );
-
-
-                if (
-                    viewerZoom <= MIN_ZOOM
-                ) {
-
-                    viewerZoom =
-                        MIN_ZOOM;
-
-                    viewerX = 0;
-
-                    viewerY = 0;
-
-                }
-
-
-                updateViewerTransform();
-
-            }
-
-
-            lastPinchDistance =
-                distance;
-
-
-            return;
-
-        }
-
-
-        // --------------------------------------------------------
-        // One finger pan
-        // --------------------------------------------------------
-
-        if (
-            event.touches.length === 1 &&
-            viewerZoom > MIN_ZOOM
-        ) {
-
-            const x =
-                event.touches[0].clientX;
-
-            const y =
-                event.touches[0].clientY;
-
-
-            viewerX =
-                startViewerX +
-                (
-                    x -
-                    dragStartX
-                );
-
-
-            viewerY =
-                startViewerY +
-                (
-                    y -
-                    dragStartY
-                );
-
-
-            updateViewerTransform();
-
-        }
-
-    },
-    {
-        passive: false
-    }
-);
-
-
-// ================================================================
-// TOUCH END
-// ================================================================
-
-viewerStage.addEventListener(
-    "touchend",
-    event => {
-
-        event.preventDefault();
-
-
-        if (
-            event.touches.length < 2
-        ) {
-
-            lastPinchDistance =
-                null;
-
-        }
-
-    },
-    {
-        passive: false
     }
 );
 
@@ -1800,9 +1629,11 @@ viewerStage.addEventListener(
             viewerZoom =
                 MIN_ZOOM;
 
-            viewerX = 0;
+            viewerX =
+                0;
 
-            viewerY = 0;
+            viewerY =
+                0;
 
         }
 
@@ -1817,7 +1648,242 @@ viewerStage.addEventListener(
 
 
 // ================================================================
-// PREVENT BROWSER DOUBLE-TAP ZOOM
+// TOUCH DISTANCE
+// ================================================================
+
+function getTouchDistance(
+    touch1,
+    touch2
+) {
+
+    const dx =
+        touch2.clientX -
+        touch1.clientX;
+
+    const dy =
+        touch2.clientY -
+        touch1.clientY;
+
+
+    return Math.sqrt(
+        dx * dx +
+        dy * dy
+    );
+
+}
+
+
+// ================================================================
+// MOBILE TOUCH START
+// ================================================================
+
+viewerStage.addEventListener(
+    "touchstart",
+    event => {
+
+        event.preventDefault();
+
+
+        // --------------------------------------------------------
+        // Pinch
+        // --------------------------------------------------------
+
+        if (
+            event.touches.length === 2
+        ) {
+
+            lastTouchDistance =
+                getTouchDistance(
+                    event.touches[0],
+                    event.touches[1]
+                );
+
+            return;
+
+        }
+
+
+        // --------------------------------------------------------
+        // One finger
+        // --------------------------------------------------------
+
+        if (
+            event.touches.length === 1 &&
+            viewerZoom > MIN_ZOOM
+        ) {
+
+            touchStartX =
+                event.touches[0].clientX;
+
+            touchStartY =
+                event.touches[0].clientY;
+
+            touchOriginX =
+                viewerX;
+
+            touchOriginY =
+                viewerY;
+
+        }
+
+    },
+    {
+        passive: false
+    }
+);
+
+
+// ================================================================
+// MOBILE TOUCH MOVE
+// ================================================================
+
+viewerStage.addEventListener(
+    "touchmove",
+    event => {
+
+        event.preventDefault();
+
+
+        // --------------------------------------------------------
+        // Pinch zoom
+        // --------------------------------------------------------
+
+        if (
+            event.touches.length === 2
+        ) {
+
+            const distance =
+                getTouchDistance(
+                    event.touches[0],
+                    event.touches[1]
+                );
+
+
+            if (
+                lastTouchDistance !== null
+            ) {
+
+                const zoomAmount =
+                    distance /
+                    lastTouchDistance;
+
+
+                viewerZoom *=
+                    zoomAmount;
+
+
+                viewerZoom =
+                    Math.max(
+                        MIN_ZOOM,
+                        Math.min(
+                            MAX_ZOOM,
+                            viewerZoom
+                        )
+                    );
+
+
+                if (
+                    viewerZoom <= MIN_ZOOM
+                ) {
+
+                    viewerZoom =
+                        MIN_ZOOM;
+
+                    viewerX =
+                        0;
+
+                    viewerY =
+                        0;
+
+                }
+
+
+                updateViewerTransform();
+
+            }
+
+
+            lastTouchDistance =
+                distance;
+
+
+            return;
+
+        }
+
+
+        // --------------------------------------------------------
+        // One finger pan
+        // --------------------------------------------------------
+
+        if (
+            event.touches.length === 1 &&
+            viewerZoom > MIN_ZOOM
+        ) {
+
+            const x =
+                event.touches[0].clientX;
+
+            const y =
+                event.touches[0].clientY;
+
+
+            viewerX =
+                touchOriginX +
+                (
+                    x -
+                    touchStartX
+                );
+
+
+            viewerY =
+                touchOriginY +
+                (
+                    y -
+                    touchStartY
+                );
+
+
+            updateViewerTransform();
+
+        }
+
+    },
+    {
+        passive: false
+    }
+);
+
+
+// ================================================================
+// MOBILE TOUCH END
+// ================================================================
+
+viewerStage.addEventListener(
+    "touchend",
+    event => {
+
+        event.preventDefault();
+
+
+        if (
+            event.touches.length < 2
+        ) {
+
+            lastTouchDistance =
+                null;
+
+        }
+
+    },
+    {
+        passive: false
+    }
+);
+
+
+// ================================================================
+// PREVENT MOBILE DOUBLE-TAP BROWSER ZOOM
 // ================================================================
 
 document.addEventListener(
@@ -1845,7 +1911,7 @@ document.addEventListener(
 
 
 // ================================================================
-// KEEP VIEWER CORRECT AFTER WINDOW RESIZE
+// RESIZE
 // ================================================================
 
 window.addEventListener(
