@@ -959,50 +959,41 @@ if (openedArtworks.size === 4) {
 
 }
 
-
-// ================================================
-// CLOSE VIEWER
-// ================================================
+// --------------------------------
+// Close viewer
+// --------------------------------
 
 function closeViewer() {
 
-    artViewer.classList.remove(
-        "open"
-    );
+    artViewer.classList.remove("open");
 
-    document.body.style.overflow =
-        "";
+    artViewer.classList.remove("brief-open");
 
+    document.body.style.overflow = "";
 
     viewerImage.src = "";
 
-    viewerImage.style.width =
-        "";
+    viewerScale = 1;
 
-    viewerImage.style.height =
-        "";
+    viewerBaseScale = 1;
+
+    viewerX = 0;
+
+    viewerY = 0;
 
     viewerImage.style.transform =
         "translate3d(0, 0, 0) scale(1)";
 
-
-    viewerScale = 1;
-
-    viewerX = 0;
-    viewerY = 0;
-
 }
 
-
-// ================================================
-// ARTWORK NAVIGATION
-// ================================================
+// --------------------------------
+// Artwork & Brief Navigation
+// --------------------------------
 
 artItems.forEach(item => {
 
     const button =
         item.querySelector(".art-button");
-
 
     button.addEventListener(
         "click",
@@ -1018,16 +1009,21 @@ artItems.forEach(item => {
 
             if (isMobile) {
 
-                // First tap reveals title
+                /*
+                First tap:
+                reveal the title.
+                */
 
                 if (
-                    !item.classList.contains(
-                        "focused"
-                    )
+                    !item.classList.contains("focused")
                 ) {
 
                     event.preventDefault();
 
+                    /*
+                    Remove focus from
+                    every other item.
+                    */
 
                     artItems.forEach(
                         otherItem => {
@@ -1046,6 +1042,10 @@ artItems.forEach(item => {
                     );
 
 
+                    /*
+                    Focus this item.
+                    */
+
                     item.classList.add(
                         "focused"
                     );
@@ -1058,6 +1058,40 @@ artItems.forEach(item => {
 
 
             // --------------------------------
+            // Second tap / desktop click
+            // --------------------------------
+
+            /*
+            If this is The Brief,
+            open the brief instead of artwork.
+            */
+
+            if (
+                item.id === "brief-item"
+            ) {
+
+                openBrief();
+
+                return;
+
+            }
+
+
+            // --------------------------------
+            // Artwork
+            // --------------------------------
+
+            if (artName) {
+
+                openArtwork(artName);
+
+            }
+
+        }
+    );
+
+});
+            // --------------------------------
             // Open artwork
             // --------------------------------
 
@@ -1069,6 +1103,19 @@ artItems.forEach(item => {
     );
 
 });
+
+// --------------------------------
+// Open The Brief
+// --------------------------------
+
+function openBrief() {
+
+    artViewer.classList.add("open");
+    artViewer.classList.add("brief-open");
+
+    document.body.style.overflow = "hidden";
+
+}
 
 // --------------------------------
 // The Brief
@@ -1424,5 +1471,183 @@ viewerStage.addEventListener(
     },
     {
         passive: false
+    }
+);
+
+// --------------------------------
+// Desktop Zoom
+// --------------------------------
+
+viewerStage.addEventListener(
+    "wheel",
+    event => {
+
+        /*
+        Don't zoom while The Brief is open.
+        */
+
+        if (
+            artViewer.classList.contains("brief-open")
+        ) {
+
+            return;
+
+        }
+
+        event.preventDefault();
+
+
+        /*
+        Trackpad / mouse wheel direction
+        */
+
+        const zoomAmount =
+            event.deltaY < 0
+                ? 1.08
+                : 0.92;
+
+
+        const previousScale =
+            viewerScale;
+
+
+        viewerScale *= zoomAmount;
+
+
+        /*
+        Limit zoom
+        */
+
+        viewerScale =
+            Math.max(
+                MIN_ZOOM,
+                Math.min(
+                    MAX_ZOOM,
+                    viewerScale
+                )
+            );
+
+
+        /*
+        When returning to 1×,
+        always center the artwork.
+        */
+
+        if (
+            viewerScale <= MIN_ZOOM
+        ) {
+
+            viewerScale =
+                MIN_ZOOM;
+
+            viewerX = 0;
+            viewerY = 0;
+
+        }
+
+
+        /*
+        Gradually return toward center
+        while zooming out.
+        */
+
+        else if (
+            viewerScale < previousScale
+        ) {
+
+            const centeringAmount = 0.12;
+
+            viewerX *=
+                1 - centeringAmount;
+
+            viewerY *=
+                1 - centeringAmount;
+
+        }
+
+
+        updateViewerTransform();
+
+    },
+    {
+        passive: false
+    }
+);
+
+// --------------------------------
+// Desktop Pan
+// --------------------------------
+
+let mouseDown = false;
+
+let lastMouseX = 0;
+let lastMouseY = 0;
+
+
+viewerStage.addEventListener(
+    "mousedown",
+    event => {
+
+        if (
+            viewerScale <= 1 ||
+            artViewer.classList.contains("brief-open")
+        ) {
+
+            return;
+
+        }
+
+        mouseDown = true;
+
+        lastMouseX =
+            event.clientX;
+
+        lastMouseY =
+            event.clientY;
+
+    }
+);
+
+
+viewerStage.addEventListener(
+    "mousemove",
+    event => {
+
+        if (!mouseDown) {
+            return;
+        }
+
+        const dx =
+            event.clientX -
+            lastMouseX;
+
+        const dy =
+            event.clientY -
+            lastMouseY;
+
+
+        viewerX += dx;
+        viewerY += dy;
+
+
+        lastMouseX =
+            event.clientX;
+
+        lastMouseY =
+            event.clientY;
+
+
+        updateViewerTransform();
+
+    }
+);
+
+
+window.addEventListener(
+    "mouseup",
+    () => {
+
+        mouseDown = false;
+
     }
 );
