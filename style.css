@@ -406,7 +406,6 @@ Mobile Navigation
 /* --------------------------------
    Artwork Viewer
 -------------------------------- */
-
 #art-viewer {
 
     position: fixed;
@@ -418,12 +417,15 @@ Mobile Navigation
     background: #000;
 
     display: flex;
+
     align-items: center;
     justify-content: center;
 
     opacity: 0;
 
     visibility: hidden;
+
+    pointer-events: none;
 
     transition:
         opacity 0.4s ease,
@@ -433,9 +435,7 @@ Mobile Navigation
 }
 
 
-/* --------------------------------
-   Viewer open state
--------------------------------- */
+/* Viewer open */
 
 #art-viewer.open {
 
@@ -443,8 +443,8 @@ Mobile Navigation
 
     visibility: visible;
 
+    pointer-events: auto;
 }
-
 
 /* --------------------------------
    Image stage
