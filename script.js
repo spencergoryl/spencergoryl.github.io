@@ -1,26 +1,24 @@
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
-
-// ================================================================
-// ARTWORK DATA
-// ================================================================
-
 const artworkPaths = {
-
     "solar-steam": "solar-steam.jpg",
-
     "cloud-break": "cloud-break.jpg",
-
     "clinical-perception": "clinical-perception.jpg",
-
     "idle-thought": "idle-thought.jpg"
-
 };
 
+const navigation = document.getElementById("art-navigation");
 
-// Keep track of which artworks have been opened
-const openedArtworks = new Set();
+const artItems = document.querySelectorAll(".art-item:not(#brief-item)");
+const artButtons = document.querySelectorAll(
+    ".art-item:not(#brief-item) .art-button"
+);
+
+const briefItem = document.getElementById("brief-item");
+const briefButton = document.getElementById("brief-button");
+
+const isMobile = window.matchMedia("(hover: none)").matches;
 
 
 // ================================================================
@@ -30,43 +28,25 @@ const openedArtworks = new Set();
 Object.values(artworkPaths).forEach(path => {
 
     const image = new Image();
-
     image.src = path;
 
 });
 
 
 // ================================================================
-// NAVIGATION ELEMENTS
+// TRACK OPENED ARTWORK
 // ================================================================
 
-const navigation =
-    document.getElementById("art-navigation");
-
-const artItems =
-    document.querySelectorAll(".art-item");
-
-const artButtons =
-    document.querySelectorAll(
-        ".art-item:not(#brief-item) .art-button"
-    );
-
-const briefItem =
-    document.getElementById("brief-item");
-
-const briefButton =
-    document.getElementById("brief-button");
-
-const isMobile =
-    window.matchMedia("(hover: none)").matches;
+const openedArtworks = new Set();
 
 
 // ================================================================
-// FORCE BRIEF TO START HIDDEN
+// THE BRIEF STARTS COMPLETELY HIDDEN
 // ================================================================
 
-briefItem.classList.remove("visible");
-briefItem.classList.remove("focused");
+briefItem.style.opacity = "0";
+briefItem.style.pointerEvents = "none";
+briefItem.style.visibility = "hidden";
 
 
 // ================================================================
@@ -80,10 +60,7 @@ document.fonts.ready.then(() => {
     // ------------------------------------------------------------
 
     const dpr =
-        Math.min(
-            window.devicePixelRatio || 1,
-            2
-        );
+        Math.min(window.devicePixelRatio || 1, 2);
 
     const width =
         window.innerWidth;
@@ -118,21 +95,13 @@ document.fonts.ready.then(() => {
     // ------------------------------------------------------------
 
     const PARTICLE_COUNT = 1200;
-
     const FOLLOW_SPEED = 0.01;
-
     const HOLD_TIME = 1500;
-
     const MELT_DURATION = 900;
-
     const FONT_APPEAR_POINT = 0.80;
-
     const FONT_START_SCALE = 0.9;
-
     const FONT_SETTLE_DURATION = 1000;
-
     const PARTICLE_CONTRACT_DURATION = 900;
-
     const MAX_FONT_SIZE = 100;
 
 
@@ -220,7 +189,6 @@ document.fonts.ready.then(() => {
             Math.round(5 * dpr)
         );
 
-
     for (
         let y = 0;
         y < textCanvas.height;
@@ -241,11 +209,8 @@ document.fonts.ready.then(() => {
             ) {
 
                 pixels.push({
-
                     x: x / dpr,
-
                     y: y / dpr
-
                 });
 
             }
@@ -268,9 +233,7 @@ document.fonts.ready.then(() => {
     ) {
 
         const target =
-            pixels[
-                i % pixels.length
-            ];
+            pixels[i % pixels.length];
 
         particles.push({
 
@@ -322,9 +285,7 @@ document.fonts.ready.then(() => {
     function easeInOut(t) {
 
         return t < 0.5
-
             ? 2 * t * t
-
             : 1 -
               Math.pow(
                   -2 * t + 2,
@@ -373,7 +334,7 @@ document.fonts.ready.then(() => {
 
 
         // --------------------------------------------------------
-        // Move particles toward targets
+        // Move particles
         // --------------------------------------------------------
 
         if (
@@ -389,7 +350,6 @@ document.fonts.ready.then(() => {
                 );
 
             let totalDistanceSquared = 0;
-
 
             for (
                 let i = 0;
@@ -434,9 +394,11 @@ document.fonts.ready.then(() => {
                     12 * 12
                 ) {
 
-                    phase = "holding";
+                    phase =
+                        "holding";
 
-                    phaseTime = 0;
+                    phaseTime =
+                        0;
 
                 }
 
@@ -460,9 +422,11 @@ document.fonts.ready.then(() => {
                 phaseTime >= HOLD_TIME
             ) {
 
-                phase = "melting";
+                phase =
+                    "melting";
 
-                phaseTime = 0;
+                phaseTime =
+                    0;
 
             }
 
@@ -489,9 +453,11 @@ document.fonts.ready.then(() => {
                 meltProgress =
                     FONT_APPEAR_POINT;
 
-                phase = "resolving";
+                phase =
+                    "resolving";
 
-                phaseTime = 0;
+                phaseTime =
+                    0;
 
             }
 
@@ -528,7 +494,8 @@ document.fonts.ready.then(() => {
                 particleContractProgress >= 1
             ) {
 
-                phase = "complete";
+                phase =
+                    "complete";
 
             }
 
@@ -610,8 +577,8 @@ document.fonts.ready.then(() => {
             phase === "resolving"
         ) {
 
-            ctx.fillStyle = "white";
-
+            ctx.fillStyle =
+                "white";
 
             for (
                 let i = 0;
@@ -777,9 +744,9 @@ const briefContent =
 // VIEWER STATE
 // ================================================================
 
-let viewerScale = 1;
-
 let viewerBaseScale = 1;
+
+let viewerScale = 1;
 
 let viewerX = 0;
 
@@ -817,7 +784,7 @@ let dragOriginY = 0;
 
 
 // ================================================================
-// WHEEL ZOOM
+// UPDATE IMAGE TRANSFORM
 // ================================================================
 
 function updateViewerTransform() {
@@ -832,6 +799,32 @@ function updateViewerTransform() {
             ${viewerY}px,
             0
         ) scale(${actualScale})`;
+
+}
+
+
+// ================================================================
+// RESET VIEWER
+// ================================================================
+
+function resetViewer() {
+
+    viewerBaseScale = 1;
+
+    viewerScale = 1;
+
+    viewerX = 0;
+
+    viewerY = 0;
+
+    viewerImage.style.width = "";
+
+    viewerImage.style.height = "";
+
+    viewerImage.style.opacity = "0";
+
+    viewerImage.style.transform =
+        "translate3d(0, 0, 0) scale(1)";
 
 }
 
@@ -875,29 +868,21 @@ function calculateBaseScale() {
             stageHeight / imageHeight
         ) * 0.94;
 
-}
+
+    const displayWidth =
+        imageWidth *
+        viewerBaseScale;
+
+    const displayHeight =
+        imageHeight *
+        viewerBaseScale;
 
 
-// ================================================================
-// RESET VIEWER
-// ================================================================
+    viewerImage.style.width =
+        `${displayWidth}px`;
 
-function resetViewer() {
-
-    viewerScale = 1;
-
-    viewerX = 0;
-
-    viewerY = 0;
-
-    viewerBaseScale = 1;
-
-    viewerImage.style.width = "";
-
-    viewerImage.style.height = "";
-
-    viewerImage.style.transform =
-        "translate3d(0, 0, 0) scale(1)";
+    viewerImage.style.height =
+        `${displayHeight}px`;
 
 }
 
@@ -925,26 +910,34 @@ function openArtwork(artName) {
 
 
     // ------------------------------------------------------------
-    // Close Brief if it happens to be open
+    // Close Brief state
     // ------------------------------------------------------------
 
     artViewer.classList.remove(
         "brief-open"
     );
 
+
     viewerStage.style.visibility =
         "visible";
 
 
     // ------------------------------------------------------------
-    // Reset
+    // Reset viewer
     // ------------------------------------------------------------
 
-    resetViewer();
+    viewerScale = 1;
+
+    viewerX = 0;
+
+    viewerY = 0;
+
+    viewerImage.style.opacity =
+        "0";
 
 
     // ------------------------------------------------------------
-    // Load artwork
+    // Image load
     // ------------------------------------------------------------
 
     viewerImage.onload = () => {
@@ -959,8 +952,24 @@ function openArtwork(artName) {
 
         updateViewerTransform();
 
+
+        // Small fade-in
+        requestAnimationFrame(() => {
+
+            viewerImage.style.transition =
+                "opacity 0.25s ease";
+
+            viewerImage.style.opacity =
+                "1";
+
+        });
+
     };
 
+
+    // ------------------------------------------------------------
+    // Set image
+    // ------------------------------------------------------------
 
     viewerImage.src =
         imagePath;
@@ -985,7 +994,7 @@ function openArtwork(artName) {
 
 
     // ------------------------------------------------------------
-    // Record artwork as opened
+    // Remember artwork
     // ------------------------------------------------------------
 
     openedArtworks.add(
@@ -999,7 +1008,7 @@ function openArtwork(artName) {
 
 
 // ================================================================
-// BRIEF UNLOCK
+// CHECK BRIEF UNLOCK
 // ================================================================
 
 function checkBriefUnlock() {
@@ -1019,11 +1028,18 @@ function checkBriefUnlock() {
             "visible"
         );
 
-    } else {
 
-        briefItem.classList.remove(
-            "visible"
-        );
+        // Override the general
+        // navigation item rule
+
+        briefItem.style.opacity =
+            "1";
+
+        briefItem.style.pointerEvents =
+            "auto";
+
+        briefItem.style.visibility =
+            "visible";
 
     }
 
@@ -1031,12 +1047,11 @@ function checkBriefUnlock() {
 
 
 // ================================================================
-// OPEN BRIEF
+// OPEN THE BRIEF
 // ================================================================
 
 function openBrief() {
 
-    // Safety check
     if (
         openedArtworks.size <
         Object.keys(artworkPaths).length
@@ -1055,8 +1070,10 @@ function openBrief() {
         "brief-open"
     );
 
+
     viewerStage.style.visibility =
         "hidden";
+
 
     document.body.style.overflow =
         "hidden";
@@ -1078,15 +1095,20 @@ function closeViewer() {
         "brief-open"
     );
 
+
     viewerStage.style.visibility =
         "visible";
+
 
     document.body.style.overflow =
         "";
 
+
     viewerImage.src = "";
 
+
     resetViewer();
+
 
     lastDistance = null;
 
@@ -1131,6 +1153,7 @@ artButtons.forEach(button => {
 
                 event.preventDefault();
 
+
                 artItems.forEach(
                     otherItem => {
 
@@ -1141,9 +1164,11 @@ artButtons.forEach(button => {
                     }
                 );
 
+
                 item.classList.add(
                     "focused"
                 );
+
 
                 return;
 
@@ -1154,6 +1179,11 @@ artButtons.forEach(button => {
             // Desktop click
             // OR mobile second tap
             // ----------------------------------------------------
+
+            item.classList.remove(
+                "focused"
+            );
+
 
             openArtwork(
                 artName
@@ -1174,32 +1204,12 @@ briefButton.addEventListener(
     event => {
 
         // --------------------------------------------------------
-        // Never allow Brief to work before unlock
-        // --------------------------------------------------------
-
-        if (
-            openedArtworks.size <
-            Object.keys(artworkPaths).length
-        ) {
-
-            event.preventDefault();
-
-            return;
-
-        }
-
-
-        const item =
-            briefItem;
-
-
-        // --------------------------------------------------------
         // Mobile first tap
         // --------------------------------------------------------
 
         if (
             isMobile &&
-            !item.classList.contains(
+            !briefItem.classList.contains(
                 "focused"
             )
         ) {
@@ -1208,9 +1218,9 @@ briefButton.addEventListener(
 
 
             artItems.forEach(
-                otherItem => {
+                item => {
 
-                    otherItem.classList.remove(
+                    item.classList.remove(
                         "focused"
                     );
 
@@ -1218,9 +1228,10 @@ briefButton.addEventListener(
             );
 
 
-            item.classList.add(
+            briefItem.classList.add(
                 "focused"
             );
+
 
             return;
 
@@ -1228,9 +1239,13 @@ briefButton.addEventListener(
 
 
         // --------------------------------------------------------
-        // Desktop click
-        // OR mobile second tap
+        // Mobile second tap / desktop click
         // --------------------------------------------------------
+
+        briefItem.classList.remove(
+            "focused"
+        );
+
 
         openBrief();
 
@@ -1319,7 +1334,7 @@ engramTrigger.addEventListener(
 
 
 // ================================================================
-// TOUCH DISTANCE
+// TOUCH HELPERS
 // ================================================================
 
 function getTouchDistance(
@@ -1344,7 +1359,7 @@ function getTouchDistance(
 
 
 // ================================================================
-// TOUCH START
+// MOBILE TOUCH START
 // ================================================================
 
 viewerStage.addEventListener(
@@ -1353,6 +1368,10 @@ viewerStage.addEventListener(
 
         event.preventDefault();
 
+
+        // --------------------------------------------------------
+        // Two fingers
+        // --------------------------------------------------------
 
         if (
             event.touches.length === 2
@@ -1365,13 +1384,16 @@ viewerStage.addEventListener(
                 );
 
             lastTouchX = null;
-
             lastTouchY = null;
 
             return;
 
         }
 
+
+        // --------------------------------------------------------
+        // One finger
+        // --------------------------------------------------------
 
         if (
             event.touches.length === 1
@@ -1393,7 +1415,7 @@ viewerStage.addEventListener(
 
 
 // ================================================================
-// TOUCH MOVE
+// MOBILE TOUCH MOVE
 // ================================================================
 
 viewerStage.addEventListener(
@@ -1403,9 +1425,9 @@ viewerStage.addEventListener(
         event.preventDefault();
 
 
-        // --------------------------------------------------------
+        // ========================================================
         // PINCH ZOOM
-        // --------------------------------------------------------
+        // ========================================================
 
         if (
             event.touches.length === 2
@@ -1449,7 +1471,6 @@ viewerStage.addEventListener(
                         MIN_ZOOM;
 
                     viewerX = 0;
-
                     viewerY = 0;
 
                 }
@@ -1468,9 +1489,9 @@ viewerStage.addEventListener(
         }
 
 
-        // --------------------------------------------------------
-        // ONE-FINGER PAN
-        // --------------------------------------------------------
+        // ========================================================
+        // ONE FINGER PAN
+        // ========================================================
 
         if (
             event.touches.length === 1 &&
@@ -1520,7 +1541,7 @@ viewerStage.addEventListener(
 
 
 // ================================================================
-// TOUCH END
+// MOBILE TOUCH END
 // ================================================================
 
 viewerStage.addEventListener(
@@ -1563,7 +1584,9 @@ viewerStage.addEventListener(
     "mousedown",
     event => {
 
-        // Only allow dragging when zoomed
+        // Only allow dragging
+        // when actually zoomed
+
         if (
             viewerScale <= 1
         ) {
@@ -1600,7 +1623,11 @@ viewerStage.addEventListener(
 );
 
 
-document.addEventListener(
+// ================================================================
+// DESKTOP MOUSE MOVE
+// ================================================================
+
+viewerStage.addEventListener(
     "mousemove",
     event => {
 
@@ -1634,25 +1661,37 @@ document.addEventListener(
 );
 
 
-document.addEventListener(
-    "mouseup",
-    () => {
+// ================================================================
+// DESKTOP MOUSE UP
+// ================================================================
 
-        if (
-            !isDragging
-        ) {
+function stopDragging() {
 
-            return;
+    if (
+        !isDragging
+    ) {
 
-        }
-
-
-        isDragging = false;
-
-        viewerImage.style.cursor =
-            "grab";
+        return;
 
     }
+
+
+    isDragging = false;
+
+    viewerImage.style.cursor =
+        "grab";
+
+}
+
+
+viewerStage.addEventListener(
+    "mouseup",
+    stopDragging
+);
+
+viewerStage.addEventListener(
+    "mouseleave",
+    stopDragging
 );
 
 
@@ -1700,7 +1739,6 @@ viewerStage.addEventListener(
                 MIN_ZOOM;
 
             viewerX = 0;
-
             viewerY = 0;
 
         }
@@ -1718,23 +1756,55 @@ viewerStage.addEventListener(
 // ================================================================
 // PREVENT MOBILE DOUBLE-TAP BROWSER ZOOM
 // ================================================================
+//
+// touch-action: manipulation in the CSS handles the navigation
+// buttons. This additional handler prevents the browser from
+// interpreting rapid taps on the navigation as a zoom gesture.
+//
+// We deliberately DO NOT apply this to the artwork viewer,
+// because pinch-to-zoom needs to remain available there.
+// ================================================================
+
+let lastNavigationTap = 0;
 
 document.addEventListener(
-    "dblclick",
+    "touchend",
     event => {
 
-        if (
+        const navigationButton =
             event.target.closest(
                 ".art-button"
-            ) ||
-            event.target.closest(
-                "#brief-button"
-            )
+            );
+
+
+        if (
+            !navigationButton
+        ) {
+
+            return;
+
+        }
+
+
+        const now =
+            Date.now();
+
+
+        if (
+            now - lastNavigationTap <
+            350
         ) {
 
             event.preventDefault();
 
         }
 
+
+        lastNavigationTap =
+            now;
+
+    },
+    {
+        passive: false
     }
 );
