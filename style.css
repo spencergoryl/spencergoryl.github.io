@@ -213,37 +213,26 @@ Second row, centered
 -------------------------------- */
 
 #brief-item {
-
     grid-column: 1 / -1;
-
     justify-self: center;
-
     width: max-content;
-
-    opacity: 0;
-
-    pointer-events: none;
-
+    opacity: 0 !important;
+    pointer-events: none !important;
+    visibility: hidden;
     transform: translateY(6px);
-
 }
-
 
 /* --------------------------------
 Reveal The Brief
 -------------------------------- */
 
 #art-navigation.visible #brief-item.visible {
-
-    opacity: 1;
-
-    pointer-events: auto;
-
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    visibility: visible;
     transform: translateY(0);
-
     transition-delay: 0s;
 }
-
 
 /* --------------------------------
 Artwork title
