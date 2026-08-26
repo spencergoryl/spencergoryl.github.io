@@ -183,7 +183,6 @@ Reveal artwork items
     opacity: 1;
 
     transform: translateY(0);
-
 }
 
 
@@ -219,6 +218,8 @@ Second row, centered
 
     justify-self: center;
 
+    width: max-content;
+
     opacity: 0;
 
     pointer-events: none;
@@ -241,10 +242,11 @@ Reveal The Brief
     transform: translateY(0);
 
     transition-delay: 0s;
-
 }
+
+
 /* --------------------------------
-   Artwork title
+Artwork title
 -------------------------------- */
 
 .art-title {
@@ -267,7 +269,6 @@ Reveal The Brief
 
     z-index: 1;
 
-    /* Slightly unresolved initial state */
     filter: blur(2px);
 
     transform:
@@ -281,7 +282,7 @@ Reveal The Brief
 
 
 /* --------------------------------
-   Glass button
+Glass button
 -------------------------------- */
 
 .art-button {
@@ -302,13 +303,19 @@ Reveal The Brief
 
     opacity: 1;
 
+    /*
+    Prevent browser double-tap zoom
+    on these navigation buttons.
+    */
+
     touch-action: manipulation;
-    
+
     -webkit-tap-highlight-color: transparent;
 }
 
+
 /* --------------------------------
-   Hover
+Hover
 -------------------------------- */
 
 .art-item:hover .art-title {
@@ -318,11 +325,11 @@ Reveal The Brief
     transform:
         skewX(0)
         translateX(0);
-
 }
 
+
 /* --------------------------------
-   Focused navigation item
+Focused navigation item
 -------------------------------- */
 
 .art-item.focused .art-title {
@@ -332,21 +339,11 @@ Reveal The Brief
     transform:
         skewX(0)
         translateX(0);
-
 }
 
-/* --------------------------------
-   Text beneath glass
--------------------------------- */
-
-.art-item:hover .art-title {
-
-    opacity: 1;
-
-}
 
 /* --------------------------------
-   Mobile Navigation
+Mobile Navigation
 -------------------------------- */
 
 @media (max-width: 700px) {
@@ -395,25 +392,21 @@ Reveal The Brief
 
         inset: -12px -10px;
 
-        /*
-        Prevent accidental browser
-        double-tap zoom.
-        */
-
         touch-action: manipulation;
 
     }
 
 
     /*
-    The Brief gets its own centered row
+    The Brief gets its own
+    centered third row.
     */
 
     #brief-item {
 
         grid-column: 1 / -1;
 
-        width: 100%;
+        width: max-content;
 
         justify-self: center;
 
@@ -591,20 +584,6 @@ Reveal The Brief
 /* --------------------------------
 The Brief
 -------------------------------- */
-
-#art-navigation.visible #brief-item {
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(6px);
-}
-
-/* Reveal The Brief after all artwork has been opened */
-
-#art-navigation.visible #brief-item.visible {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateY(0);
-}
 
 /* Brief viewer content */
 
