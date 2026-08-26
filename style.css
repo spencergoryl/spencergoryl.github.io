@@ -510,7 +510,7 @@ Reveal The Brief
    Zoomed image cursor
 -------------------------------- */
 
-#viewer-image:active {
+#viewer-stage:active #viewer-image {
 
     cursor: grabbing;
 
