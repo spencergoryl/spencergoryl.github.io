@@ -1,17 +1,26 @@
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
+
+// ================================================================
+// ARTWORK DATA
+// ================================================================
+
 const artworkPaths = {
+
     "solar-steam": "solar-steam.jpg",
+
     "cloud-break": "cloud-break.jpg",
+
     "clinical-perception": "clinical-perception.jpg",
+
     "idle-thought": "idle-thought.jpg"
+
 };
 
-const openedArtworks = new Set();
 
-const navigation =
-    document.getElementById("art-navigation");
+// Keep track of which artworks have been opened
+const openedArtworks = new Set();
 
 
 // ================================================================
@@ -21,9 +30,43 @@ const navigation =
 Object.values(artworkPaths).forEach(path => {
 
     const image = new Image();
+
     image.src = path;
 
 });
+
+
+// ================================================================
+// NAVIGATION ELEMENTS
+// ================================================================
+
+const navigation =
+    document.getElementById("art-navigation");
+
+const artItems =
+    document.querySelectorAll(".art-item");
+
+const artButtons =
+    document.querySelectorAll(
+        ".art-item:not(#brief-item) .art-button"
+    );
+
+const briefItem =
+    document.getElementById("brief-item");
+
+const briefButton =
+    document.getElementById("brief-button");
+
+const isMobile =
+    window.matchMedia("(hover: none)").matches;
+
+
+// ================================================================
+// FORCE BRIEF TO START HIDDEN
+// ================================================================
+
+briefItem.classList.remove("visible");
+briefItem.classList.remove("focused");
 
 
 // ================================================================
@@ -71,7 +114,7 @@ document.fonts.ready.then(() => {
 
 
     // ------------------------------------------------------------
-    // Animation Controls
+    // Animation controls
     // ------------------------------------------------------------
 
     const PARTICLE_COUNT = 1200;
@@ -198,8 +241,11 @@ document.fonts.ready.then(() => {
             ) {
 
                 pixels.push({
+
                     x: x / dpr,
+
                     y: y / dpr
+
                 });
 
             }
@@ -255,20 +301,15 @@ document.fonts.ready.then(() => {
     // Animation state
     // ------------------------------------------------------------
 
-    let phase =
-        "forming";
+    let phase = "forming";
 
-    let phaseTime =
-        0;
+    let phaseTime = 0;
 
-    let meltProgress =
-        0;
+    let meltProgress = 0;
 
-    let fontSettleProgress =
-        0;
+    let fontSettleProgress = 0;
 
-    let particleContractProgress =
-        0;
+    let particleContractProgress = 0;
 
     let lastTime =
         performance.now();
@@ -323,10 +364,6 @@ document.fonts.ready.then(() => {
             deltaTime / 1000;
 
 
-        // --------------------------------------------------------
-        // Clear canvas
-        // --------------------------------------------------------
-
         ctx.clearRect(
             0,
             0,
@@ -351,8 +388,7 @@ document.fonts.ready.then(() => {
                     -FOLLOW_SPEED * 60 * dt
                 );
 
-            let totalDistanceSquared =
-                0;
+            let totalDistanceSquared = 0;
 
 
             for (
@@ -385,10 +421,6 @@ document.fonts.ready.then(() => {
             }
 
 
-            // ----------------------------------------------------
-            // Detect completed formation
-            // ----------------------------------------------------
-
             if (
                 phase === "forming"
             ) {
@@ -402,11 +434,9 @@ document.fonts.ready.then(() => {
                     12 * 12
                 ) {
 
-                    phase =
-                        "holding";
+                    phase = "holding";
 
-                    phaseTime =
-                        0;
+                    phaseTime = 0;
 
                 }
 
@@ -416,7 +446,7 @@ document.fonts.ready.then(() => {
 
 
         // --------------------------------------------------------
-        // Hold dotted ENGRAM
+        // Hold
         // --------------------------------------------------------
 
         if (
@@ -430,11 +460,9 @@ document.fonts.ready.then(() => {
                 phaseTime >= HOLD_TIME
             ) {
 
-                phase =
-                    "melting";
+                phase = "melting";
 
-                phaseTime =
-                    0;
+                phaseTime = 0;
 
             }
 
@@ -442,7 +470,7 @@ document.fonts.ready.then(() => {
 
 
         // --------------------------------------------------------
-        // Melt particles
+        // Melt
         // --------------------------------------------------------
 
         if (
@@ -461,11 +489,9 @@ document.fonts.ready.then(() => {
                 meltProgress =
                     FONT_APPEAR_POINT;
 
-                phase =
-                    "resolving";
+                phase = "resolving";
 
-                phaseTime =
-                    0;
+                phaseTime = 0;
 
             }
 
@@ -473,7 +499,7 @@ document.fonts.ready.then(() => {
 
 
         // --------------------------------------------------------
-        // Resolve font and particles
+        // Resolve
         // --------------------------------------------------------
 
         if (
@@ -502,8 +528,7 @@ document.fonts.ready.then(() => {
                 particleContractProgress >= 1
             ) {
 
-                phase =
-                    "complete";
+                phase = "complete";
 
             }
 
@@ -514,8 +539,7 @@ document.fonts.ready.then(() => {
         // Particle expansion
         // --------------------------------------------------------
 
-        let expansion =
-            0;
+        let expansion = 0;
 
         if (
             phase === "melting"
@@ -534,8 +558,7 @@ document.fonts.ready.then(() => {
         // Font scale
         // --------------------------------------------------------
 
-        let fontScale =
-            0;
+        let fontScale = 0;
 
         if (
             phase === "resolving"
@@ -559,8 +582,7 @@ document.fonts.ready.then(() => {
             phase === "complete"
         ) {
 
-            fontScale =
-                1;
+            fontScale = 1;
 
             if (
                 !navigation.classList.contains(
@@ -588,8 +610,7 @@ document.fonts.ready.then(() => {
             phase === "resolving"
         ) {
 
-            ctx.fillStyle =
-                "white";
+            ctx.fillStyle = "white";
 
 
             for (
@@ -619,9 +640,7 @@ document.fonts.ready.then(() => {
                     size =
                         normalSize;
 
-                }
-
-                else if (
+                } else if (
                     phase === "melting"
                 ) {
 
@@ -632,9 +651,7 @@ document.fonts.ready.then(() => {
                             normalSize
                         ) * expansion;
 
-                }
-
-                else {
+                } else {
 
                     const contract =
                         easeInOut(
@@ -752,60 +769,55 @@ const viewerImage =
 const viewerClose =
     document.getElementById("viewer-close");
 
-const artItems =
-    document.querySelectorAll(".art-item");
-
-const artButtons =
-    document.querySelectorAll(
-        ".art-item:not(#brief-item) .art-button"
-    );
-
-const briefItem =
-    document.getElementById("brief-item");
-
-const briefButton =
-    document.getElementById("brief-button");
-
-const isMobile =
-    window.matchMedia(
-        "(hover: none)"
-    ).matches;
+const briefContent =
+    document.getElementById("brief-content");
 
 
 // ================================================================
 // VIEWER STATE
 // ================================================================
 
-let viewerScale =
-    1;
+let viewerScale = 1;
 
-let viewerBaseScale =
-    1;
+let viewerBaseScale = 1;
 
-let viewerX =
-    0;
+let viewerX = 0;
 
-let viewerY =
-    0;
+let viewerY = 0;
 
-const MIN_ZOOM =
-    1;
+const MIN_ZOOM = 1;
 
-const MAX_ZOOM =
-    4;
-
-let lastDistance =
-    null;
-
-let lastTouchX =
-    null;
-
-let lastTouchY =
-    null;
+const MAX_ZOOM = 4;
 
 
 // ================================================================
-// UPDATE VIEWER TRANSFORM
+// TOUCH STATE
+// ================================================================
+
+let lastDistance = null;
+
+let lastTouchX = null;
+
+let lastTouchY = null;
+
+
+// ================================================================
+// DESKTOP DRAG STATE
+// ================================================================
+
+let isDragging = false;
+
+let dragStartX = 0;
+
+let dragStartY = 0;
+
+let dragOriginX = 0;
+
+let dragOriginY = 0;
+
+
+// ================================================================
+// WHEEL ZOOM
 // ================================================================
 
 function updateViewerTransform() {
@@ -819,14 +831,13 @@ function updateViewerTransform() {
             ${viewerX}px,
             ${viewerY}px,
             0
-        )
-        scale(${actualScale})`;
+        ) scale(${actualScale})`;
 
 }
 
 
 // ================================================================
-// CALCULATE FIT SCALE
+// CALCULATE IMAGE SCALE
 // ================================================================
 
 function calculateBaseScale() {
@@ -851,8 +862,7 @@ function calculateBaseScale() {
         !stageHeight
     ) {
 
-        viewerBaseScale =
-            1;
+        viewerBaseScale = 1;
 
         return;
 
@@ -874,25 +884,20 @@ function calculateBaseScale() {
 
 function resetViewer() {
 
-    viewerScale =
-        1;
+    viewerScale = 1;
 
-    viewerX =
-        0;
+    viewerX = 0;
 
-    viewerY =
-        0;
+    viewerY = 0;
 
-    lastDistance =
-        null;
+    viewerBaseScale = 1;
 
-    lastTouchX =
-        null;
+    viewerImage.style.width = "";
 
-    lastTouchY =
-        null;
+    viewerImage.style.height = "";
 
-    updateViewerTransform();
+    viewerImage.style.transform =
+        "translate3d(0, 0, 0) scale(1)";
 
 }
 
@@ -920,7 +925,7 @@ function openArtwork(artName) {
 
 
     // ------------------------------------------------------------
-    // Close Brief state
+    // Close Brief if it happens to be open
     // ------------------------------------------------------------
 
     artViewer.classList.remove(
@@ -932,22 +937,8 @@ function openArtwork(artName) {
 
 
     // ------------------------------------------------------------
-    // Remember artwork
+    // Reset
     // ------------------------------------------------------------
-
-    openedArtworks.add(
-        artName
-    );
-
-    checkBriefUnlock();
-
-
-    // ------------------------------------------------------------
-    // Reset before loading
-    // ------------------------------------------------------------
-
-    viewerBaseScale =
-        1;
 
     resetViewer();
 
@@ -956,14 +947,19 @@ function openArtwork(artName) {
     // Load artwork
     // ------------------------------------------------------------
 
-    viewerImage.onload =
-        () => {
+    viewerImage.onload = () => {
 
-            calculateBaseScale();
+        calculateBaseScale();
 
-            resetViewer();
+        viewerScale = 1;
 
-        };
+        viewerX = 0;
+
+        viewerY = 0;
+
+        updateViewerTransform();
+
+    };
 
 
     viewerImage.src =
@@ -987,11 +983,23 @@ function openArtwork(artName) {
     document.body.style.overflow =
         "hidden";
 
+
+    // ------------------------------------------------------------
+    // Record artwork as opened
+    // ------------------------------------------------------------
+
+    openedArtworks.add(
+        artName
+    );
+
+
+    checkBriefUnlock();
+
 }
 
 
 // ================================================================
-// CHECK BRIEF UNLOCK
+// BRIEF UNLOCK
 // ================================================================
 
 function checkBriefUnlock() {
@@ -1011,43 +1019,44 @@ function checkBriefUnlock() {
             "visible"
         );
 
+    } else {
+
+        briefItem.classList.remove(
+            "visible"
+        );
+
     }
 
 }
 
 
 // ================================================================
-// OPEN THE BRIEF
+// OPEN BRIEF
 // ================================================================
 
 function openBrief() {
 
-    // Remove any artwork focus state
-    artItems.forEach(item => {
+    // Safety check
+    if (
+        openedArtworks.size <
+        Object.keys(artworkPaths).length
+    ) {
 
-        item.classList.remove(
-            "focused"
-        );
+        return;
 
-    });
+    }
 
 
-    // Make sure viewer is open
     artViewer.classList.add(
         "open"
     );
 
-
-    // Hide artwork
-    viewerStage.style.visibility =
-        "hidden";
-
-
-    // Show Brief
     artViewer.classList.add(
         "brief-open"
     );
 
+    viewerStage.style.visibility =
+        "hidden";
 
     document.body.style.overflow =
         "hidden";
@@ -1069,37 +1078,23 @@ function closeViewer() {
         "brief-open"
     );
 
-
     viewerStage.style.visibility =
         "visible";
-
 
     document.body.style.overflow =
         "";
 
-
-    viewerImage.src =
-        "";
-
-
-    viewerImage.onload =
-        null;
-
-
-    viewerBaseScale =
-        1;
+    viewerImage.src = "";
 
     resetViewer();
 
+    lastDistance = null;
 
-    // Clear mobile focus
-    artItems.forEach(item => {
+    lastTouchX = null;
 
-        item.classList.remove(
-            "focused"
-        );
+    lastTouchY = null;
 
-    });
+    isDragging = false;
 
 }
 
@@ -1136,28 +1131,19 @@ artButtons.forEach(button => {
 
                 event.preventDefault();
 
-
                 artItems.forEach(
                     otherItem => {
 
-                        if (
-                            otherItem !== item
-                        ) {
-
-                            otherItem.classList.remove(
-                                "focused"
-                            );
-
-                        }
+                        otherItem.classList.remove(
+                            "focused"
+                        );
 
                     }
                 );
 
-
                 item.classList.add(
                     "focused"
                 );
-
 
                 return;
 
@@ -1180,7 +1166,7 @@ artButtons.forEach(button => {
 
 
 // ================================================================
-// THE BRIEF BUTTON
+// BRIEF BUTTON
 // ================================================================
 
 briefButton.addEventListener(
@@ -1188,12 +1174,32 @@ briefButton.addEventListener(
     event => {
 
         // --------------------------------------------------------
+        // Never allow Brief to work before unlock
+        // --------------------------------------------------------
+
+        if (
+            openedArtworks.size <
+            Object.keys(artworkPaths).length
+        ) {
+
+            event.preventDefault();
+
+            return;
+
+        }
+
+
+        const item =
+            briefItem;
+
+
+        // --------------------------------------------------------
         // Mobile first tap
         // --------------------------------------------------------
 
         if (
             isMobile &&
-            !briefItem.classList.contains(
+            !item.classList.contains(
                 "focused"
             )
         ) {
@@ -1202,9 +1208,9 @@ briefButton.addEventListener(
 
 
             artItems.forEach(
-                item => {
+                otherItem => {
 
-                    item.classList.remove(
+                    otherItem.classList.remove(
                         "focused"
                     );
 
@@ -1212,10 +1218,9 @@ briefButton.addEventListener(
             );
 
 
-            briefItem.classList.add(
+            item.classList.add(
                 "focused"
             );
-
 
             return;
 
@@ -1314,7 +1319,7 @@ engramTrigger.addEventListener(
 
 
 // ================================================================
-// TOUCH HELPERS
+// TOUCH DISTANCE
 // ================================================================
 
 function getTouchDistance(
@@ -1349,10 +1354,6 @@ viewerStage.addEventListener(
         event.preventDefault();
 
 
-        // --------------------------------------------------------
-        // Two fingers
-        // --------------------------------------------------------
-
         if (
             event.touches.length === 2
         ) {
@@ -1363,20 +1364,14 @@ viewerStage.addEventListener(
                     event.touches[1]
                 );
 
-            lastTouchX =
-                null;
+            lastTouchX = null;
 
-            lastTouchY =
-                null;
+            lastTouchY = null;
 
             return;
 
         }
 
-
-        // --------------------------------------------------------
-        // One finger
-        // --------------------------------------------------------
 
         if (
             event.touches.length === 1
@@ -1408,9 +1403,9 @@ viewerStage.addEventListener(
         event.preventDefault();
 
 
-        // ========================================================
+        // --------------------------------------------------------
         // PINCH ZOOM
-        // ========================================================
+        // --------------------------------------------------------
 
         if (
             event.touches.length === 2
@@ -1446,23 +1441,16 @@ viewerStage.addEventListener(
                     );
 
 
-                // ------------------------------------------------
-                // Fully centered at 1×
-                // ------------------------------------------------
-
                 if (
-                    viewerScale <=
-                    MIN_ZOOM
+                    viewerScale <= MIN_ZOOM
                 ) {
 
                     viewerScale =
                         MIN_ZOOM;
 
-                    viewerX =
-                        0;
+                    viewerX = 0;
 
-                    viewerY =
-                        0;
+                    viewerY = 0;
 
                 }
 
@@ -1480,9 +1468,9 @@ viewerStage.addEventListener(
         }
 
 
-        // ========================================================
-        // ONE FINGER PAN
-        // ========================================================
+        // --------------------------------------------------------
+        // ONE-FINGER PAN
+        // --------------------------------------------------------
 
         if (
             event.touches.length === 1 &&
@@ -1518,11 +1506,9 @@ viewerStage.addEventListener(
             }
 
 
-            lastTouchX =
-                x;
+            lastTouchX = x;
 
-            lastTouchY =
-                y;
+            lastTouchY = y;
 
         }
 
@@ -1541,8 +1527,7 @@ viewerStage.addEventListener(
     "touchend",
     event => {
 
-        lastDistance =
-            null;
+        lastDistance = null;
 
 
         if (
@@ -1555,21 +1540,118 @@ viewerStage.addEventListener(
             lastTouchY =
                 event.touches[0].clientY;
 
-        }
+        } else {
 
-        else {
+            lastTouchX = null;
 
-            lastTouchX =
-                null;
-
-            lastTouchY =
-                null;
+            lastTouchY = null;
 
         }
 
     },
     {
         passive: false
+    }
+);
+
+
+// ================================================================
+// DESKTOP MOUSE DRAG
+// ================================================================
+
+viewerStage.addEventListener(
+    "mousedown",
+    event => {
+
+        // Only allow dragging when zoomed
+        if (
+            viewerScale <= 1
+        ) {
+
+            return;
+
+        }
+
+
+        isDragging = true;
+
+
+        dragStartX =
+            event.clientX;
+
+        dragStartY =
+            event.clientY;
+
+
+        dragOriginX =
+            viewerX;
+
+        dragOriginY =
+            viewerY;
+
+
+        viewerImage.style.cursor =
+            "grabbing";
+
+
+        event.preventDefault();
+
+    }
+);
+
+
+document.addEventListener(
+    "mousemove",
+    event => {
+
+        if (
+            !isDragging
+        ) {
+
+            return;
+
+        }
+
+
+        viewerX =
+            dragOriginX +
+            (
+                event.clientX -
+                dragStartX
+            );
+
+        viewerY =
+            dragOriginY +
+            (
+                event.clientY -
+                dragStartY
+            );
+
+
+        updateViewerTransform();
+
+    }
+);
+
+
+document.addEventListener(
+    "mouseup",
+    () => {
+
+        if (
+            !isDragging
+        ) {
+
+            return;
+
+        }
+
+
+        isDragging = false;
+
+        viewerImage.style.cursor =
+            "grab";
+
     }
 );
 
@@ -1610,23 +1692,16 @@ viewerStage.addEventListener(
             );
 
 
-        // --------------------------------------------------------
-        // Recenter at minimum zoom
-        // --------------------------------------------------------
-
         if (
-            viewerScale <=
-            MIN_ZOOM
+            viewerScale <= MIN_ZOOM
         ) {
 
             viewerScale =
                 MIN_ZOOM;
 
-            viewerX =
-                0;
+            viewerX = 0;
 
-            viewerY =
-                0;
+            viewerY = 0;
 
         }
 
@@ -1641,7 +1716,7 @@ viewerStage.addEventListener(
 
 
 // ================================================================
-// PREVENT BROWSER DOUBLE-TAP ZOOM
+// PREVENT MOBILE DOUBLE-TAP BROWSER ZOOM
 // ================================================================
 
 document.addEventListener(
@@ -1654,9 +1729,6 @@ document.addEventListener(
             ) ||
             event.target.closest(
                 "#brief-button"
-            ) ||
-            event.target.closest(
-                "#viewer-stage"
             )
         ) {
 
