@@ -18,7 +18,6 @@ ENGRAM Definition
 -------------------------------- */
 
 #engram-trigger {
-
     position: fixed;
 
     left: 50%;
@@ -39,20 +38,17 @@ ENGRAM Definition
     z-index: 5;
 }
 
-
 /* --------------------------------
 Definition container
 -------------------------------- */
 
 #engram-definition {
-
     position: fixed;
 
     left: 50%;
     top: calc(50% + 85px);
 
-    transform:
-        translate(-50%, 8px);
+    transform: translate(-50%, 8px);
 
     width: min(500px, 80vw);
 
@@ -67,7 +63,6 @@ Definition container
         transform 0.6s ease;
 
     z-index: 5;
-
 }
 
 /* --------------------------------
@@ -75,21 +70,16 @@ Definition visible
 -------------------------------- */
 
 #engram-definition.visible {
-
     opacity: 1;
 
-    transform:
-        translate(-50%, 0);
-
+    transform: translate(-50%, 0);
 }
-
 
 /* --------------------------------
 Definition text
 -------------------------------- */
 
 .definition-text {
-
     font-family:
         "Averia Serif Libre",
         serif;
@@ -103,7 +93,6 @@ Definition text
     line-height: 1.5;
 
     color: white;
-
 }
 
 /* --------------------------------
@@ -111,7 +100,6 @@ Artwork Navigation
 -------------------------------- */
 
 #art-navigation {
-
     position: fixed;
 
     left: 50%;
@@ -121,7 +109,6 @@ Artwork Navigation
 
     display: grid;
 
-    /* Four artwork buttons across */
     grid-template-columns:
         repeat(4, max-content);
 
@@ -136,15 +123,20 @@ Artwork Navigation
     pointer-events: none;
 
     z-index: 10;
-}
 
+    /*
+    Prevent mobile browsers from
+    interpreting rapid taps as
+    browser double-tap zoom.
+    */
+    touch-action: manipulation;
+}
 
 /* --------------------------------
 Artwork items
 -------------------------------- */
 
 .art-item {
-
     position: relative;
 
     display: flex;
@@ -160,31 +152,27 @@ Artwork items
     transition:
         opacity 1s ease,
         transform 1s ease;
-}
 
+    touch-action: manipulation;
+}
 
 /* --------------------------------
 Reveal navigation
 -------------------------------- */
 
 #art-navigation.visible {
-
     pointer-events: auto;
-
 }
-
 
 /* --------------------------------
 Reveal artwork items
 -------------------------------- */
 
 #art-navigation.visible .art-item {
-
     opacity: 1;
 
     transform: translateY(0);
 }
-
 
 /* --------------------------------
 Staggered appearance
@@ -206,7 +194,6 @@ Staggered appearance
     transition-delay: 0.36s;
 }
 
-
 /* --------------------------------
 The Brief
 Second row, centered
@@ -214,12 +201,18 @@ Second row, centered
 
 #brief-item {
     grid-column: 1 / -1;
+
     justify-self: center;
+
     width: max-content;
-    opacity: 0 !important;
-    pointer-events: none !important;
-    visibility: hidden;
+
+    opacity: 0;
+
+    pointer-events: none;
+
     transform: translateY(6px);
+
+    touch-action: manipulation;
 }
 
 /* --------------------------------
@@ -227,10 +220,12 @@ Reveal The Brief
 -------------------------------- */
 
 #art-navigation.visible #brief-item.visible {
-    opacity: 1 !important;
-    pointer-events: auto !important;
-    visibility: visible;
+    opacity: 1;
+
+    pointer-events: auto;
+
     transform: translateY(0);
+
     transition-delay: 0s;
 }
 
@@ -239,7 +234,6 @@ Artwork title
 -------------------------------- */
 
 .art-title {
-
     position: relative;
 
     display: block;
@@ -269,13 +263,11 @@ Artwork title
         transform 0.5s ease;
 }
 
-
 /* --------------------------------
 Glass button
 -------------------------------- */
 
 .art-button {
-
     position: absolute;
 
     inset: -12px -18px;
@@ -294,42 +286,36 @@ Glass button
 
     /*
     Prevent browser double-tap zoom
-    on these navigation buttons.
+    while preserving normal taps.
     */
-
     touch-action: manipulation;
 
     -webkit-tap-highlight-color: transparent;
 }
-
 
 /* --------------------------------
 Hover
 -------------------------------- */
 
 .art-item:hover .art-title {
-
     filter: blur(0);
 
     transform:
         skewX(0)
         translateX(0);
 }
-
 
 /* --------------------------------
 Focused navigation item
 -------------------------------- */
 
 .art-item.focused .art-title {
-
     filter: blur(0);
 
     transform:
         skewX(0)
         translateX(0);
 }
-
 
 /* --------------------------------
 Mobile Navigation
@@ -338,7 +324,6 @@ Mobile Navigation
 @media (max-width: 700px) {
 
     #art-navigation {
-
         bottom: 14%;
 
         width: 90vw;
@@ -356,35 +341,28 @@ Mobile Navigation
 
         align-items: center;
 
+        touch-action: manipulation;
     }
 
-
     .art-item {
-
         width: 100%;
 
         justify-content: center;
 
+        touch-action: manipulation;
     }
 
-
     .art-title {
-
         font-size: 16px;
 
         letter-spacing: 0.03em;
-
     }
 
-
     .art-button {
-
         inset: -12px -10px;
 
         touch-action: manipulation;
-
     }
-
 
     /*
     The Brief gets its own
@@ -392,22 +370,19 @@ Mobile Navigation
     */
 
     #brief-item {
-
         grid-column: 1 / -1;
 
         width: max-content;
 
         justify-self: center;
-
     }
-
 }
 
 /* --------------------------------
-   Artwork Viewer
+Artwork Viewer
 -------------------------------- */
-#art-viewer {
 
+#art-viewer {
     position: fixed;
 
     inset: 0;
@@ -425,8 +400,6 @@ Mobile Navigation
 
     visibility: hidden;
 
-    pointer-events: none;
-
     transition:
         opacity 0.4s ease,
         visibility 0.4s ease;
@@ -434,20 +407,18 @@ Mobile Navigation
     overflow: hidden;
 }
 
-
-/* Viewer open */
+/* --------------------------------
+Viewer open state
+-------------------------------- */
 
 #art-viewer.open {
-
     opacity: 1;
 
     visibility: visible;
-
-    pointer-events: auto;
 }
 
 /* --------------------------------
-   Image stage
+Image stage
 -------------------------------- */
 
 #viewer-stage {
@@ -466,8 +437,9 @@ Mobile Navigation
 }
 
 /* --------------------------------
-   Artwork
+Artwork
 -------------------------------- */
+
 #viewer-image {
     position: absolute;
 
@@ -482,28 +454,28 @@ Mobile Navigation
     user-select: none;
     -webkit-user-select: none;
 
+    -webkit-user-drag: none;
+
     will-change: transform;
 
     transform-origin: center center;
 
     cursor: grab;
 }
+
 /* --------------------------------
-   Zoomed image cursor
+Zoomed image cursor
 -------------------------------- */
 
-#viewer-stage:active #viewer-image {
-
+#viewer-stage.grabbing #viewer-image {
     cursor: grabbing;
-
 }
 
 /* --------------------------------
-   Close button
+Close button
 -------------------------------- */
 
 #viewer-close {
-
     position: fixed;
 
     top: 24px;
@@ -525,6 +497,7 @@ Mobile Navigation
     font-family: Arial, sans-serif;
 
     font-size: 32px;
+
     font-weight: 200;
 
     line-height: 42px;
@@ -537,53 +510,52 @@ Mobile Navigation
 
     transition:
         opacity 0.3s ease;
-
 }
 
-
-/* Show close button only when viewer is open */
+/* --------------------------------
+Show close button only when viewer
+is open
+-------------------------------- */
 
 #art-viewer.open #viewer-close {
-
     opacity: 0.7;
 
     pointer-events: auto;
-
 }
-
 
 #art-viewer.open #viewer-close:hover {
-
     opacity: 1;
-
 }
+
 /* --------------------------------
-   Mobile viewer
+Mobile viewer
 -------------------------------- */
+
 @media (max-width: 700px) {
 
     #viewer-close {
-
         top: 16px;
+
         right: 18px;
-
     }
-
 }
+
 /* --------------------------------
 The Brief
 -------------------------------- */
 
-/* Brief viewer content */
+/* --------------------------------
+Brief viewer content
+-------------------------------- */
 
 #brief-content {
-
     position: absolute;
 
     left: 50%;
     top: 50%;
 
-    transform: translate(-50%, -50%);
+    transform:
+        translate(-50%, -50%);
 
     width: min(650px, 80vw);
 
@@ -600,26 +572,37 @@ The Brief
         visibility 0.4s ease;
 
     z-index: 105;
+
+    pointer-events: none;
 }
 
-/* Show brief */
+/* --------------------------------
+Show brief
+-------------------------------- */
 
 #art-viewer.brief-open #brief-content {
-
     opacity: 1;
 
     visibility: visible;
+
+    pointer-events: auto;
 }
 
-/* Hide artwork while brief is open */
+/* --------------------------------
+Hide artwork while brief is open
+-------------------------------- */
 
 #art-viewer.brief-open #viewer-stage {
-
     visibility: hidden;
+
+    pointer-events: none;
 }
 
-.brief-title {
+/* --------------------------------
+Brief title
+-------------------------------- */
 
+.brief-title {
     font-family:
         "Averia Serif Libre",
         serif;
@@ -629,8 +612,11 @@ The Brief
     margin-bottom: 30px;
 }
 
-.brief-text {
+/* --------------------------------
+Brief text
+-------------------------------- */
 
+.brief-text {
     font-family:
         "Averia Serif Libre",
         serif;
