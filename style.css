@@ -1,3 +1,4 @@
+```css
 html,
 body {
     margin: 0;
@@ -48,7 +49,8 @@ Definition container
     left: 50%;
     top: calc(50% + 85px);
 
-    transform: translate(-50%, 8px);
+    transform:
+        translate(-50%, 8px);
 
     width: min(500px, 80vw);
 
@@ -72,7 +74,8 @@ Definition visible
 #engram-definition.visible {
     opacity: 1;
 
-    transform: translate(-50%, 0);
+    transform:
+        translate(-50%, 0);
 }
 
 /* --------------------------------
@@ -109,6 +112,7 @@ Artwork Navigation
 
     display: grid;
 
+    /* Four artwork buttons across */
     grid-template-columns:
         repeat(4, max-content);
 
@@ -123,13 +127,6 @@ Artwork Navigation
     pointer-events: none;
 
     z-index: 10;
-
-    /*
-    Prevent mobile browsers from
-    interpreting rapid taps as
-    browser double-tap zoom.
-    */
-    touch-action: manipulation;
 }
 
 /* --------------------------------
@@ -152,8 +149,6 @@ Artwork items
     transition:
         opacity 1s ease,
         transform 1s ease;
-
-    touch-action: manipulation;
 }
 
 /* --------------------------------
@@ -211,8 +206,6 @@ Second row, centered
     pointer-events: none;
 
     transform: translateY(6px);
-
-    touch-action: manipulation;
 }
 
 /* --------------------------------
@@ -286,8 +279,9 @@ Glass button
 
     /*
     Prevent browser double-tap zoom
-    while preserving normal taps.
+    on these navigation buttons.
     */
+
     touch-action: manipulation;
 
     -webkit-tap-highlight-color: transparent;
@@ -340,16 +334,12 @@ Mobile Navigation
         justify-items: center;
 
         align-items: center;
-
-        touch-action: manipulation;
     }
 
     .art-item {
         width: 100%;
 
         justify-content: center;
-
-        touch-action: manipulation;
     }
 
     .art-title {
@@ -392,7 +382,6 @@ Artwork Viewer
     background: #000;
 
     display: flex;
-
     align-items: center;
     justify-content: center;
 
@@ -454,8 +443,6 @@ Artwork
     user-select: none;
     -webkit-user-select: none;
 
-    -webkit-user-drag: none;
-
     will-change: transform;
 
     transform-origin: center center;
@@ -467,7 +454,7 @@ Artwork
 Zoomed image cursor
 -------------------------------- */
 
-#viewer-stage.grabbing #viewer-image {
+#viewer-stage:active #viewer-image {
     cursor: grabbing;
 }
 
@@ -513,8 +500,7 @@ Close button
 }
 
 /* --------------------------------
-Show close button only when viewer
-is open
+Show close button only when viewer is open
 -------------------------------- */
 
 #art-viewer.open #viewer-close {
@@ -535,7 +521,6 @@ Mobile viewer
 
     #viewer-close {
         top: 16px;
-
         right: 18px;
     }
 }
@@ -544,9 +529,7 @@ Mobile viewer
 The Brief
 -------------------------------- */
 
-/* --------------------------------
-Brief viewer content
--------------------------------- */
+/* Brief viewer content */
 
 #brief-content {
     position: absolute;
@@ -554,8 +537,7 @@ Brief viewer content
     left: 50%;
     top: 50%;
 
-    transform:
-        translate(-50%, -50%);
+    transform: translate(-50%, -50%);
 
     width: min(650px, 80vw);
 
@@ -572,8 +554,6 @@ Brief viewer content
         visibility 0.4s ease;
 
     z-index: 105;
-
-    pointer-events: none;
 }
 
 /* --------------------------------
@@ -584,8 +564,6 @@ Show brief
     opacity: 1;
 
     visibility: visible;
-
-    pointer-events: auto;
 }
 
 /* --------------------------------
@@ -594,13 +572,7 @@ Hide artwork while brief is open
 
 #art-viewer.brief-open #viewer-stage {
     visibility: hidden;
-
-    pointer-events: none;
 }
-
-/* --------------------------------
-Brief title
--------------------------------- */
 
 .brief-title {
     font-family:
@@ -611,10 +583,6 @@ Brief title
 
     margin-bottom: 30px;
 }
-
-/* --------------------------------
-Brief text
--------------------------------- */
 
 .brief-text {
     font-family:
@@ -627,3 +595,4 @@ Brief text
 
     letter-spacing: 0.025em;
 }
+```
