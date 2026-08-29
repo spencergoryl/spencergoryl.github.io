@@ -168,9 +168,8 @@ Reveal navigation
 Reveal artwork items
 -------------------------------- */
 
-#art-navigation.visible .art-item {
+#art-navigation.visible .art-item:not(#brief-item) {
     opacity: 1;
-
     transform: translateY(0);
 }
 
