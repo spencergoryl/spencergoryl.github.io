@@ -1003,6 +1003,27 @@ document.addEventListener(
 );
 
 // ================================================================
+// PREVENT BROWSER DOUBLE-TAP ZOOM
+// ================================================================
+
+document.addEventListener(
+    "dblclick",
+    event => {
+
+        if (
+            event.target.closest(".art-button") ||
+            event.target.closest("#brief-button") ||
+            event.target.closest("#viewer-stage")
+        ) {
+
+            event.preventDefault();
+
+        }
+
+    }
+);
+
+// ================================================================
 // ENGRAM PARTICLE ANIMATION
 // ================================================================
 
