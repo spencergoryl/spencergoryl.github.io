@@ -1,5 +1,31 @@
+```javascript
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
+
+const navigation = document.getElementById("art-navigation");
+
+const artViewer = document.getElementById("art-viewer");
+const viewerStage = document.getElementById("viewer-stage");
+const viewerImage = document.getElementById("viewer-image");
+const viewerClose = document.getElementById("viewer-close");
+
+const engramTrigger = document.getElementById("engram-trigger");
+const engramDefinition = document.getElementById("engram-definition");
+
+const briefItem = document.getElementById("brief-item");
+const briefButton = document.getElementById("brief-button");
+
+const artItems = document.querySelectorAll(".art-item");
+const artButtons = document.querySelectorAll(
+    "#art-navigation .art-item:not(#brief-item) .art-button"
+);
+
+const isMobile = window.matchMedia("(hover: none)").matches;
+
+
+// ================================================================
+// ARTWORK
+// ================================================================
 
 const artworkPaths = {
     "solar-steam": "solar-steam.jpg",
@@ -8,59 +34,601 @@ const artworkPaths = {
     "idle-thought": "idle-thought.jpg"
 };
 
-// ================================================================
-// ELEMENTS
-// ================================================================
-
-const navigation = document.getElementById("art-navigation");
-
-const artItems = document.querySelectorAll(".art-item");
-const artButtons = document.querySelectorAll(
-    ".art-item:not(#brief-item) .art-button"
-);
-
-const briefItem = document.getElementById("brief-item");
-const briefButton = document.getElementById("brief-button");
-
-const artViewer = document.getElementById("art-viewer");
-const viewerStage = document.getElementById("viewer-stage");
-const viewerImage = document.getElementById("viewer-image");
-const viewerClose = document.getElementById("viewer-close");
-const briefContent = document.getElementById("brief-content");
-
-const engramTrigger =
-    document.getElementById("engram-trigger");
-
-const engramDefinition =
-    document.getElementById("engram-definition");
-
-// ================================================================
-// DEVICE
-// ================================================================
-
-const isMobile =
-    window.matchMedia("(hover: none)").matches;
-
-// ================================================================
-// ARTWORK TRACKING
-// ================================================================
-
-// This Set exists ONCE.
-// Each artwork is added when it is successfully opened.
-
-const openedArtworks = new Set();
 
 // ================================================================
 // PRELOAD ARTWORK
 // ================================================================
 
 Object.values(artworkPaths).forEach(path => {
-
     const image = new Image();
-
     image.src = path;
+});
+
+
+// ================================================================
+// TRACK OPENED ARTWORK
+// ================================================================
+
+const openedArtworks = new Set();
+
+
+// ================================================================
+// ENGRAM PARTICLE ANIMATION
+// ================================================================
+
+document.fonts.ready.then(() => {
+
+    const dpr = Math.min(
+        window.devicePixelRatio || 1,
+        2
+    );
+
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+
+    ctx.setTransform(
+        dpr,
+        0,
+        0,
+        dpr,
+        0,
+        0
+    );
+
+
+    // ------------------------------------------------------------
+    // Animation controls
+    // ------------------------------------------------------------
+
+    const PARTICLE_COUNT = 1200;
+    const FOLLOW_SPEED = 0.01;
+    const HOLD_TIME = 1500;
+    const MELT_DURATION = 900;
+    const FONT_APPEAR_POINT = 0.80;
+    const FONT_START_SCALE = 0.9;
+    const FONT_SETTLE_DURATION = 1000;
+    const PARTICLE_CONTRACT_DURATION = 900;
+    const MAX_FONT_SIZE = 100;
+
+
+    // ------------------------------------------------------------
+    // Typography
+    // ------------------------------------------------------------
+
+    const fontSize = Math.min(
+        width * 0.1,
+        MAX_FONT_SIZE
+    );
+
+    const centerX = Math.round(width / 2);
+    const centerY = Math.round(height / 2);
+
+    const font =
+        `700 ${fontSize}px "Averia Serif Libre"`;
+
+
+    // ------------------------------------------------------------
+    // Create text mask
+    // ------------------------------------------------------------
+
+    const textCanvas = document.createElement("canvas");
+    const textCtx = textCanvas.getContext("2d");
+
+    textCanvas.width = width * dpr;
+    textCanvas.height = height * dpr;
+
+    textCtx.setTransform(
+        dpr,
+        0,
+        0,
+        dpr,
+        0,
+        0
+    );
+
+    textCtx.font = font;
+    textCtx.textAlign = "center";
+    textCtx.textBaseline = "middle";
+    textCtx.fillStyle = "white";
+
+    textCtx.fillText(
+        "Engram",
+        centerX,
+        centerY
+    );
+
+
+    // ------------------------------------------------------------
+    // Find text pixels
+    // ------------------------------------------------------------
+
+    const imageData = textCtx.getImageData(
+        0,
+        0,
+        textCanvas.width,
+        textCanvas.height
+    );
+
+    const pixels = [];
+
+    const sampleSize = Math.max(
+        1,
+        Math.round(5 * dpr)
+    );
+
+
+    for (
+        let y = 0;
+        y < textCanvas.height;
+        y += sampleSize
+    ) {
+
+        for (
+            let x = 0;
+            x < textCanvas.width;
+            x += sampleSize
+        ) {
+
+            const index =
+                (y * textCanvas.width + x) * 4;
+
+            if (
+                imageData.data[index + 3] > 128
+            ) {
+
+                pixels.push({
+                    x: x / dpr,
+                    y: y / dpr
+                });
+
+            }
+
+        }
+
+    }
+
+
+    // ------------------------------------------------------------
+    // Create particles
+    // ------------------------------------------------------------
+
+    const particles = [];
+
+    for (
+        let i = 0;
+        i < PARTICLE_COUNT;
+        i++
+    ) {
+
+        const target =
+            pixels[i % pixels.length];
+
+        particles.push({
+
+            x: Math.random() * width,
+            y: Math.random() * height,
+
+            targetX: target.x,
+            targetY: target.y,
+
+            size: Math.random() * 2 + 0.5,
+            sizeVariation: Math.random() * 0.8 + 0.6
+
+        });
+
+    }
+
+
+    // ------------------------------------------------------------
+    // Animation state
+    // ------------------------------------------------------------
+
+    let phase = "forming";
+
+    let phaseTime = 0;
+    let meltProgress = 0;
+    let fontSettleProgress = 0;
+    let particleContractProgress = 0;
+
+    let lastTime = performance.now();
+
+
+    // ------------------------------------------------------------
+    // Easing
+    // ------------------------------------------------------------
+
+    function easeInOut(t) {
+
+        return t < 0.5
+            ? 2 * t * t
+            : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
+    }
+
+
+    function easeOut(t) {
+
+        return 1 - Math.pow(1 - t, 3);
+
+    }
+
+
+    // ------------------------------------------------------------
+    // Animation loop
+    // ------------------------------------------------------------
+
+    function animate(currentTime) {
+
+        const deltaTime = Math.min(
+            currentTime - lastTime,
+            32
+        );
+
+        lastTime = currentTime;
+
+        const dt = deltaTime / 1000;
+
+
+        ctx.clearRect(
+            0,
+            0,
+            width,
+            height
+        );
+
+
+        // --------------------------------------------------------
+        // Move particles
+        // --------------------------------------------------------
+
+        if (
+            phase === "forming" ||
+            phase === "holding" ||
+            phase === "melting"
+        ) {
+
+            const followAmount =
+                1 - Math.exp(
+                    -FOLLOW_SPEED * 60 * dt
+                );
+
+            let totalDistanceSquared = 0;
+
+
+            for (
+                let i = 0;
+                i < particles.length;
+                i++
+            ) {
+
+                const particle = particles[i];
+
+                const dx =
+                    particle.targetX - particle.x;
+
+                const dy =
+                    particle.targetY - particle.y;
+
+                particle.x +=
+                    dx * followAmount;
+
+                particle.y +=
+                    dy * followAmount;
+
+                totalDistanceSquared +=
+                    dx * dx +
+                    dy * dy;
+
+            }
+
+
+            if (phase === "forming") {
+
+                const averageDistanceSquared =
+                    totalDistanceSquared /
+                    particles.length;
+
+                if (
+                    averageDistanceSquared <
+                    12 * 12
+                ) {
+
+                    phase = "holding";
+                    phaseTime = 0;
+
+                }
+
+            }
+
+        }
+
+
+        // --------------------------------------------------------
+        // Hold
+        // --------------------------------------------------------
+
+        if (phase === "holding") {
+
+            phaseTime += deltaTime;
+
+            if (phaseTime >= HOLD_TIME) {
+
+                phase = "melting";
+                phaseTime = 0;
+
+            }
+
+        }
+
+
+        // --------------------------------------------------------
+        // Melt
+        // --------------------------------------------------------
+
+        if (phase === "melting") {
+
+            meltProgress +=
+                deltaTime / MELT_DURATION;
+
+            if (
+                meltProgress >=
+                FONT_APPEAR_POINT
+            ) {
+
+                meltProgress =
+                    FONT_APPEAR_POINT;
+
+                phase = "resolving";
+                phaseTime = 0;
+
+            }
+
+        }
+
+
+        // --------------------------------------------------------
+        // Resolve
+        // --------------------------------------------------------
+
+        if (phase === "resolving") {
+
+            phaseTime += deltaTime;
+
+            fontSettleProgress =
+                Math.min(
+                    phaseTime /
+                    FONT_SETTLE_DURATION,
+                    1
+                );
+
+            particleContractProgress =
+                Math.min(
+                    phaseTime /
+                    PARTICLE_CONTRACT_DURATION,
+                    1
+                );
+
+            if (
+                fontSettleProgress >= 1 &&
+                particleContractProgress >= 1
+            ) {
+
+                phase = "complete";
+
+            }
+
+        }
+
+
+        // --------------------------------------------------------
+        // Particle expansion
+        // --------------------------------------------------------
+
+        let expansion = 0;
+
+        if (phase === "melting") {
+
+            expansion =
+                easeInOut(
+                    meltProgress /
+                    FONT_APPEAR_POINT
+                );
+
+        }
+
+
+        // --------------------------------------------------------
+        // Font scale
+        // --------------------------------------------------------
+
+        let fontScale = 0;
+
+        if (phase === "resolving") {
+
+            const eased =
+                easeOut(
+                    fontSettleProgress
+                );
+
+            fontScale =
+                FONT_START_SCALE -
+                (
+                    FONT_START_SCALE - 1
+                ) * eased;
+
+        }
+
+
+        if (phase === "complete") {
+
+            fontScale = 1;
+
+            if (
+                !navigation.classList.contains(
+                    "visible"
+                )
+            ) {
+
+                navigation.classList.add(
+                    "visible"
+                );
+
+            }
+
+        }
+
+
+        // --------------------------------------------------------
+        // Draw particles
+        // --------------------------------------------------------
+
+        if (
+            phase === "forming" ||
+            phase === "holding" ||
+            phase === "melting" ||
+            phase === "resolving"
+        ) {
+
+            ctx.fillStyle = "white";
+
+
+            for (
+                let i = 0;
+                i < particles.length;
+                i++
+            ) {
+
+                const particle = particles[i];
+
+                const normalSize =
+                    particle.size;
+
+                const expandedSize =
+                    5.5 *
+                    particle.sizeVariation;
+
+                let size;
+
+
+                if (
+                    phase === "forming" ||
+                    phase === "holding"
+                ) {
+
+                    size = normalSize;
+
+                }
+                else if (
+                    phase === "melting"
+                ) {
+
+                    size =
+                        normalSize +
+                        (
+                            expandedSize -
+                            normalSize
+                        ) * expansion;
+
+                }
+                else {
+
+                    const contract =
+                        easeInOut(
+                            particleContractProgress
+                        );
+
+                    const minimumSize = 0.15;
+
+                    size =
+                        expandedSize *
+                        (
+                            minimumSize +
+                            (
+                                1 -
+                                minimumSize
+                            ) *
+                            (
+                                1 -
+                                contract
+                            )
+                        );
+
+                }
+
+
+                ctx.beginPath();
+
+                ctx.arc(
+                    particle.x,
+                    particle.y,
+                    size,
+                    0,
+                    Math.PI * 2
+                );
+
+                ctx.fill();
+
+            }
+
+        }
+
+
+        // --------------------------------------------------------
+        // Draw crisp typography
+        // --------------------------------------------------------
+
+        if (
+            phase === "resolving" ||
+            phase === "complete"
+        ) {
+
+            ctx.save();
+
+            ctx.translate(
+                centerX,
+                centerY
+            );
+
+            ctx.scale(
+                fontScale,
+                fontScale
+            );
+
+            ctx.font = font;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillStyle = "white";
+
+            ctx.fillText(
+                "Engram",
+                0,
+                0
+            );
+
+            ctx.restore();
+
+        }
+
+
+        requestAnimationFrame(
+            animate
+        );
+
+    }
+
+
+    requestAnimationFrame(
+        animate
+    );
 
 });
+
 
 // ================================================================
 // VIEWER STATE
@@ -75,66 +643,74 @@ let viewerY = 0;
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 4;
 
-// Touch state
+
+// ================================================================
+// TOUCH STATE
+// ================================================================
+
 let lastDistance = null;
+
 let lastTouchX = null;
 let lastTouchY = null;
 
-// ================================================================
-// BRIEF UNLOCK
-// ================================================================
+let isDragging = false;
 
-function checkBriefUnlock() {
-
-    const artworkCount =
-        Object.keys(artworkPaths).length;
-
-    /*
-    Only reveal The Brief once every
-    artwork has been opened at least once.
-    */
-
-    if (openedArtworks.size >= artworkCount) {
-
-        briefItem.classList.add("visible");
-
-    }
-
-}
 
 // ================================================================
-// VIEWER TRANSFORM
+// DESKTOP ZOOM
+// ================================================================
+
+let wheelZoomTimeout = null;
+
+
+// ================================================================
+// UPDATE VIEWER TRANSFORM
 // ================================================================
 
 function updateViewerTransform() {
 
     const actualScale =
-        viewerBaseScale * viewerScale;
+        viewerBaseScale *
+        viewerScale;
 
     viewerImage.style.transform =
         `translate3d(
             ${viewerX}px,
             ${viewerY}px,
             0
-        )
-        scale(${actualScale})`;
+        ) scale(${actualScale})`;
 
 }
 
+
 // ================================================================
-// RESET VIEWER POSITION
+// RESET VIEWER
 // ================================================================
 
-function resetViewerPosition() {
+function resetViewer() {
 
     viewerScale = 1;
+    viewerBaseScale = 1;
 
     viewerX = 0;
     viewerY = 0;
 
-    updateViewerTransform();
+    lastDistance = null;
+    lastTouchX = null;
+    lastTouchY = null;
+
+    isDragging = false;
+
+    viewerImage.style.cursor = "grab";
+
+    viewerImage.style.width = "";
+    viewerImage.style.height = "";
+
+    viewerImage.style.transform =
+        "translate3d(0, 0, 0) scale(1)";
 
 }
+
 
 // ================================================================
 // CALCULATE IMAGE FIT
@@ -154,6 +730,7 @@ function calculateBaseScale() {
     const stageHeight =
         viewerStage.clientHeight;
 
+
     if (
         !imageWidth ||
         !imageHeight ||
@@ -167,10 +744,6 @@ function calculateBaseScale() {
 
     }
 
-    /*
-    Fit the entire artwork inside
-    the viewer with a small margin.
-    */
 
     viewerBaseScale =
         Math.min(
@@ -179,6 +752,7 @@ function calculateBaseScale() {
         ) * 0.94;
 
 }
+
 
 // ================================================================
 // OPEN ARTWORK
@@ -200,90 +774,103 @@ function openArtwork(artName) {
 
     }
 
-    /*
-    IMPORTANT:
-    Make sure the artwork viewer is
-    completely in artwork mode.
-    */
+
+    // ------------------------------------------------------------
+    // Make sure Brief mode is completely off
+    // ------------------------------------------------------------
 
     artViewer.classList.remove(
         "brief-open"
     );
 
-    /*
-    Make the image stage active again.
-    */
-
     viewerStage.style.visibility =
         "visible";
 
-    viewerStage.style.pointerEvents =
-        "auto";
 
-    /*
-    Reset viewer.
-    */
+    // ------------------------------------------------------------
+    // Reset viewer
+    // ------------------------------------------------------------
 
-    viewerScale = 1;
+    resetViewer();
 
-    viewerX = 0;
-    viewerY = 0;
 
-    viewerBaseScale = 1;
-
-    viewerImage.style.transform =
-        "translate3d(0, 0, 0) scale(1)";
-
-    /*
-    Load image.
-    */
+    // ------------------------------------------------------------
+    // Load image
+    // ------------------------------------------------------------
 
     viewerImage.onload = function () {
 
         calculateBaseScale();
 
-        resetViewerPosition();
+        viewerScale = 1;
+        viewerX = 0;
+        viewerY = 0;
+
+        updateViewerTransform();
 
     };
 
-    viewerImage.src =
-        imagePath;
+
+    viewerImage.src = imagePath;
 
     viewerImage.alt =
-        artName.replace(/-/g, " ");
+        artName.replace(
+            /-/g,
+            " "
+        );
 
-    /*
-    Open viewer.
-    */
+
+    // ------------------------------------------------------------
+    // Open viewer
+    // ------------------------------------------------------------
 
     artViewer.classList.add(
         "open"
     );
 
-    /*
-    Prevent page scrolling while viewer
-    is actually open.
-    */
-
     document.body.style.overflow =
         "hidden";
 
-    /*
-    Remember this artwork.
-    */
+
+    // ------------------------------------------------------------
+    // Remember artwork
+    // ------------------------------------------------------------
 
     openedArtworks.add(
         artName
     );
 
-    /*
-    Check whether all four artworks
-    have now been opened.
-    */
 
     checkBriefUnlock();
 
 }
+
+
+// ================================================================
+// CHECK BRIEF UNLOCK
+// ================================================================
+
+function checkBriefUnlock() {
+
+    const artworkCount =
+        Object.keys(
+            artworkPaths
+        ).length;
+
+
+    if (
+        openedArtworks.size >=
+        artworkCount
+    ) {
+
+        briefItem.classList.add(
+            "visible"
+        );
+
+    }
+
+}
+
 
 // ================================================================
 // OPEN BRIEF
@@ -291,36 +878,35 @@ function openArtwork(artName) {
 
 function openBrief() {
 
-    /*
-    Open the viewer container.
-    */
-
+    // Make sure the viewer is open
     artViewer.classList.add(
         "open"
     );
 
-    /*
-    Hide artwork interaction completely.
-    */
 
+    // Make sure artwork is completely hidden
     viewerStage.style.visibility =
         "hidden";
 
-    viewerStage.style.pointerEvents =
-        "none";
 
-    /*
-    Show brief.
-    */
-
+    // Show Brief
     artViewer.classList.add(
         "brief-open"
     );
 
+
     document.body.style.overflow =
         "hidden";
 
+
+    // Clear any artwork dragging state
+    lastDistance = null;
+    lastTouchX = null;
+    lastTouchY = null;
+    isDragging = false;
+
 }
+
 
 // ================================================================
 // CLOSE VIEWER
@@ -328,10 +914,6 @@ function openBrief() {
 
 function closeViewer() {
 
-    /*
-    Close BOTH viewer modes.
-    */
-
     artViewer.classList.remove(
         "open"
     );
@@ -340,59 +922,23 @@ function closeViewer() {
         "brief-open"
     );
 
-    /*
-    This is important.
-
-    Completely disable the viewer stage after
-    closing so its invisible full-screen layer
-    cannot sit over the navigation.
-    */
 
     viewerStage.style.visibility =
-        "hidden";
+        "visible";
 
-    viewerStage.style.pointerEvents =
-        "none";
 
-    /*
-    Remove image source.
+    document.body.style.overflow =
+        "";
 
-    This also prevents the old image from
-    lingering underneath the page.
-    */
 
     viewerImage.onload = null;
 
     viewerImage.src = "";
 
-    /*
-    Reset viewer state.
-    */
-
-    viewerScale = 1;
-    viewerBaseScale = 1;
-
-    viewerX = 0;
-    viewerY = 0;
-
-    viewerImage.style.transform =
-        "translate3d(0, 0, 0) scale(1)";
-
-    /*
-    Reset touch state.
-    */
-
-    lastDistance = null;
-    lastTouchX = null;
-    lastTouchY = null;
-
-    /*
-    Return page scrolling to normal.
-    */
-
-    document.body.style.overflow = "";
+    resetViewer();
 
 }
+
 
 // ================================================================
 // ARTWORK BUTTONS
@@ -407,55 +953,72 @@ artButtons.forEach(button => {
             event.preventDefault();
             event.stopPropagation();
 
+
             const item =
-                button.closest(".art-item");
+                button.closest(
+                    ".art-item"
+                );
 
             const artName =
                 button.dataset.art;
 
-            /*
-            MOBILE
 
-            First tap removes blur.
-            Second tap opens artwork.
-            */
+            // ----------------------------------------------------
+            // Mobile
+            // ----------------------------------------------------
 
-            if (
-                isMobile &&
-                !item.classList.contains("focused")
-            ) {
+            if (isMobile) {
 
-                /*
-                Remove focus from all
-                other artwork buttons.
-                */
+                // First tap
+                if (
+                    !item.classList.contains(
+                        "focused"
+                    )
+                ) {
 
-                artItems.forEach(otherItem => {
+                    artItems.forEach(
+                        otherItem => {
 
-                    if (
-                        otherItem !== item
-                    ) {
+                            if (
+                                otherItem !== item
+                            ) {
 
-                        otherItem.classList.remove(
-                            "focused"
-                        );
+                                otherItem.classList.remove(
+                                    "focused"
+                                );
 
-                    }
+                            }
 
-                });
+                        }
+                    );
 
-                item.classList.add(
+
+                    item.classList.add(
+                        "focused"
+                    );
+
+                    return;
+
+                }
+
+
+                // Second tap
+                item.classList.remove(
                     "focused"
+                );
+
+                openArtwork(
+                    artName
                 );
 
                 return;
 
             }
 
-            /*
-            DESKTOP
-            OR MOBILE SECOND TAP
-            */
+
+            // ----------------------------------------------------
+            // Desktop
+            // ----------------------------------------------------
 
             openArtwork(
                 artName
@@ -465,6 +1028,7 @@ artButtons.forEach(button => {
     );
 
 });
+
 
 // ================================================================
 // BRIEF BUTTON
@@ -477,33 +1041,36 @@ briefButton.addEventListener(
         event.preventDefault();
         event.stopPropagation();
 
-        /*
-        The Brief uses the same
-        two-tap behavior as artwork
-        on mobile.
-        */
 
+        // Safety check
         if (
-            isMobile &&
-            !briefItem.classList.contains("focused")
+            openedArtworks.size <
+            Object.keys(artworkPaths).length
         ) {
 
-            /*
-            Remove focus from all
-            navigation items.
-            */
+            return;
 
-            artItems.forEach(item => {
+        }
 
-                item.classList.remove(
-                    "focused"
-                );
 
-            });
+        // Mobile first tap
+        if (
+            isMobile &&
+            !briefItem.classList.contains(
+                "focused"
+            )
+        ) {
 
-            /*
-            Focus The Brief.
-            */
+            artItems.forEach(
+                item => {
+
+                    item.classList.remove(
+                        "focused"
+                    );
+
+                }
+            );
+
 
             briefItem.classList.add(
                 "focused"
@@ -513,14 +1080,18 @@ briefButton.addEventListener(
 
         }
 
-        /*
-        Desktop click OR mobile second tap.
-        */
+
+        // Mobile second tap
+        briefItem.classList.remove(
+            "focused"
+        );
+
 
         openBrief();
 
     }
 );
+
 
 // ================================================================
 // CLOSE BUTTON
@@ -538,6 +1109,7 @@ viewerClose.addEventListener(
     }
 );
 
+
 // ================================================================
 // ESCAPE KEY
 // ================================================================
@@ -548,7 +1120,9 @@ document.addEventListener(
 
         if (
             event.key === "Escape" &&
-            artViewer.classList.contains("open")
+            artViewer.classList.contains(
+                "open"
+            )
         ) {
 
             closeViewer();
@@ -558,26 +1132,28 @@ document.addEventListener(
     }
 );
 
+
 // ================================================================
 // ENGRAM DEFINITION
 // ================================================================
 
-let definitionTimer;
+let definitionTimer = null;
 
 engramTrigger.addEventListener(
     "click",
     event => {
 
         event.preventDefault();
-        event.stopPropagation();
 
         clearTimeout(
             definitionTimer
         );
 
+
         engramDefinition.classList.add(
             "visible"
         );
+
 
         definitionTimer =
             setTimeout(
@@ -593,6 +1169,7 @@ engramTrigger.addEventListener(
 
     }
 );
+
 
 // ================================================================
 // TOUCH HELPERS
@@ -618,6 +1195,7 @@ function getTouchDistance(
 
 }
 
+
 // ================================================================
 // TOUCH START
 // ================================================================
@@ -627,10 +1205,12 @@ viewerStage.addEventListener(
     event => {
 
         event.preventDefault();
+        event.stopPropagation();
 
-        /*
-        Two fingers = pinch zoom.
-        */
+
+        // --------------------------------------------------------
+        // Pinch
+        // --------------------------------------------------------
 
         if (
             event.touches.length === 2
@@ -645,13 +1225,16 @@ viewerStage.addEventListener(
             lastTouchX = null;
             lastTouchY = null;
 
+            isDragging = false;
+
             return;
 
         }
 
-        /*
-        One finger = prepare for pan.
-        */
+
+        // --------------------------------------------------------
+        // Single finger
+        // --------------------------------------------------------
 
         if (
             event.touches.length === 1
@@ -663,6 +1246,9 @@ viewerStage.addEventListener(
             lastTouchY =
                 event.touches[0].clientY;
 
+            isDragging =
+                viewerScale > 1;
+
         }
 
     },
@@ -670,6 +1256,7 @@ viewerStage.addEventListener(
         passive: false
     }
 );
+
 
 // ================================================================
 // TOUCH MOVE
@@ -680,12 +1267,12 @@ viewerStage.addEventListener(
     event => {
 
         event.preventDefault();
+        event.stopPropagation();
 
-        /*
-        ============================================
-        PINCH ZOOM
-        ============================================
-        */
+
+        // --------------------------------------------------------
+        // PINCH ZOOM
+        // --------------------------------------------------------
 
         if (
             event.touches.length === 2
@@ -697,6 +1284,7 @@ viewerStage.addEventListener(
                     event.touches[1]
                 );
 
+
             if (
                 lastDistance !== null
             ) {
@@ -705,8 +1293,10 @@ viewerStage.addEventListener(
                     distance /
                     lastDistance;
 
+
                 viewerScale *=
                     zoomAmount;
+
 
                 viewerScale =
                     Math.max(
@@ -717,26 +1307,23 @@ viewerStage.addEventListener(
                         )
                     );
 
-                /*
-                Return completely to center
-                when zoom reaches 1×.
-                */
 
                 if (
                     viewerScale <= MIN_ZOOM
                 ) {
 
-                    viewerScale =
-                        MIN_ZOOM;
+                    viewerScale = MIN_ZOOM;
 
                     viewerX = 0;
                     viewerY = 0;
 
                 }
 
+
                 updateViewerTransform();
 
             }
+
 
             lastDistance =
                 distance;
@@ -745,11 +1332,10 @@ viewerStage.addEventListener(
 
         }
 
-        /*
-        ============================================
-        ONE FINGER PAN
-        ============================================
-        */
+
+        // --------------------------------------------------------
+        // ONE FINGER PAN
+        // --------------------------------------------------------
 
         if (
             event.touches.length === 1 &&
@@ -765,6 +1351,7 @@ viewerStage.addEventListener(
             const y =
                 touch.clientY;
 
+
             if (
                 lastTouchX !== null &&
                 lastTouchY !== null
@@ -778,9 +1365,11 @@ viewerStage.addEventListener(
                     y -
                     lastTouchY;
 
+
                 updateViewerTransform();
 
             }
+
 
             lastTouchX = x;
             lastTouchY = y;
@@ -793,6 +1382,7 @@ viewerStage.addEventListener(
     }
 );
 
+
 // ================================================================
 // TOUCH END
 // ================================================================
@@ -801,7 +1391,12 @@ viewerStage.addEventListener(
     "touchend",
     event => {
 
+        event.preventDefault();
+        event.stopPropagation();
+
+
         lastDistance = null;
+
 
         if (
             event.touches.length === 1
@@ -813,10 +1408,20 @@ viewerStage.addEventListener(
             lastTouchY =
                 event.touches[0].clientY;
 
-        } else {
+        }
+        else {
 
             lastTouchX = null;
             lastTouchY = null;
+
+        }
+
+
+        if (
+            viewerScale <= 1
+        ) {
+
+            isDragging = false;
 
         }
 
@@ -825,6 +1430,28 @@ viewerStage.addEventListener(
         passive: false
     }
 );
+
+
+// ================================================================
+// TOUCH CANCEL
+// ================================================================
+
+viewerStage.addEventListener(
+    "touchcancel",
+    event => {
+
+        lastDistance = null;
+        lastTouchX = null;
+        lastTouchY = null;
+
+        isDragging = false;
+
+    },
+    {
+        passive: false
+    }
+);
+
 
 // ================================================================
 // DESKTOP / TRACKPAD ZOOM
@@ -835,9 +1462,10 @@ viewerStage.addEventListener(
     event => {
 
         event.preventDefault();
+        event.stopPropagation();
 
-        const zoomSpeed =
-            0.0025;
+
+        const zoomSpeed = 0.0025;
 
         const zoomAmount =
             Math.exp(
@@ -845,8 +1473,10 @@ viewerStage.addEventListener(
                 zoomSpeed
             );
 
+
         viewerScale *=
             zoomAmount;
+
 
         viewerScale =
             Math.max(
@@ -857,23 +1487,35 @@ viewerStage.addEventListener(
                 )
             );
 
-        /*
-        Return to center at 1×.
-        */
 
         if (
             viewerScale <= MIN_ZOOM
         ) {
 
-            viewerScale =
-                MIN_ZOOM;
+            viewerScale = MIN_ZOOM;
 
             viewerX = 0;
             viewerY = 0;
 
         }
 
+
         updateViewerTransform();
+
+
+        clearTimeout(
+            wheelZoomTimeout
+        );
+
+        wheelZoomTimeout =
+            setTimeout(
+                () => {
+
+                    wheelZoomTimeout = null;
+
+                },
+                50
+            );
 
     },
     {
@@ -881,25 +1523,19 @@ viewerStage.addEventListener(
     }
 );
 
+
 // ================================================================
-// DESKTOP MOUSE DRAG / GRAB
+// DESKTOP DRAGGING
 // ================================================================
 
-let isDragging = false;
+let mouseDown = false;
 
-let dragStartX = 0;
-let dragStartY = 0;
-
-let dragOriginX = 0;
-let dragOriginY = 0;
+let mouseStartX = 0;
+let mouseStartY = 0;
 
 viewerStage.addEventListener(
     "mousedown",
     event => {
-
-        /*
-        Only allow dragging when zoomed.
-        */
 
         if (
             viewerScale <= 1
@@ -909,33 +1545,16 @@ viewerStage.addEventListener(
 
         }
 
-        /*
-        Only left mouse button.
-        */
-
-        if (
-            event.button !== 0
-        ) {
-
-            return;
-
-        }
 
         event.preventDefault();
 
-        isDragging = true;
+        mouseDown = true;
 
-        dragStartX =
+        mouseStartX =
             event.clientX;
 
-        dragStartY =
+        mouseStartY =
             event.clientY;
-
-        dragOriginX =
-            viewerX;
-
-        dragOriginY =
-            viewerY;
 
         viewerImage.style.cursor =
             "grabbing";
@@ -943,64 +1562,66 @@ viewerStage.addEventListener(
     }
 );
 
-// ================================================================
-// MOUSE MOVE
-// ================================================================
 
-document.addEventListener(
+window.addEventListener(
     "mousemove",
     event => {
 
+        if (!mouseDown) {
+            return;
+        }
+
+
         if (
-            !isDragging
+            !artViewer.classList.contains(
+                "open"
+            ) ||
+            viewerScale <= 1
         ) {
 
             return;
 
         }
 
-        viewerX =
-            dragOriginX +
-            (
-                event.clientX -
-                dragStartX
-            );
 
-        viewerY =
-            dragOriginY +
-            (
-                event.clientY -
-                dragStartY
-            );
+        const dx =
+            event.clientX -
+            mouseStartX;
+
+        const dy =
+            event.clientY -
+            mouseStartY;
+
+
+        viewerX += dx;
+        viewerY += dy;
+
+
+        mouseStartX =
+            event.clientX;
+
+        mouseStartY =
+            event.clientY;
+
 
         updateViewerTransform();
 
     }
 );
 
-// ================================================================
-// MOUSE UP
-// ================================================================
 
-document.addEventListener(
+window.addEventListener(
     "mouseup",
     () => {
 
-        if (
-            !isDragging
-        ) {
-
-            return;
-
-        }
-
-        isDragging = false;
+        mouseDown = false;
 
         viewerImage.style.cursor =
             "grab";
 
     }
 );
+
 
 // ================================================================
 // PREVENT BROWSER DOUBLE-TAP ZOOM
@@ -1011,9 +1632,12 @@ document.addEventListener(
     event => {
 
         if (
-            event.target.closest(".art-button") ||
-            event.target.closest("#brief-button") ||
-            event.target.closest("#viewer-stage")
+            event.target.closest(
+                "#art-navigation"
+            ) ||
+            event.target.closest(
+                "#viewer-stage"
+            )
         ) {
 
             event.preventDefault();
@@ -1023,670 +1647,34 @@ document.addEventListener(
     }
 );
 
+
 // ================================================================
-// ENGRAM PARTICLE ANIMATION
+// CLEAN UP DRAGGING WHEN VIEWER CLOSES
 // ================================================================
 
-document.fonts.ready.then(() => {
+artViewer.addEventListener(
+    "transitionend",
+    () => {
 
-    const dpr =
-        Math.min(
-            window.devicePixelRatio || 1,
-            2
-        );
-
-    const width =
-        window.innerWidth;
-
-    const height =
-        window.innerHeight;
-
-    canvas.width =
-        width * dpr;
-
-    canvas.height =
-        height * dpr;
-
-    canvas.style.width =
-        `${width}px`;
-
-    canvas.style.height =
-        `${height}px`;
-
-    ctx.setTransform(
-        dpr,
-        0,
-        0,
-        dpr,
-        0,
-        0
-    );
-
-    // --------------------------------
-    // Animation controls
-    // --------------------------------
-
-    const PARTICLE_COUNT = 1200;
-
-    const FOLLOW_SPEED = 0.01;
-
-    const HOLD_TIME = 1500;
-
-    const MELT_DURATION = 900;
-
-    const FONT_APPEAR_POINT = 0.80;
-
-    const FONT_START_SCALE = 0.9;
-
-    const FONT_SETTLE_DURATION = 1000;
-
-    const PARTICLE_CONTRACT_DURATION = 900;
-
-    const MAX_FONT_SIZE = 100;
-
-    // --------------------------------
-    // Typography
-    // --------------------------------
-
-    const fontSize =
-        Math.min(
-            width * 0.1,
-            MAX_FONT_SIZE
-        );
-
-    const centerX =
-        Math.round(width / 2);
-
-    const centerY =
-        Math.round(height / 2);
-
-    const font =
-        `700 ${fontSize}px "Averia Serif Libre"`;
-
-    // --------------------------------
-    // Create text mask
-    // --------------------------------
-
-    const textCanvas =
-        document.createElement("canvas");
-
-    const textCtx =
-        textCanvas.getContext("2d");
-
-    textCanvas.width =
-        width * dpr;
-
-    textCanvas.height =
-        height * dpr;
-
-    textCtx.setTransform(
-        dpr,
-        0,
-        0,
-        dpr,
-        0,
-        0
-    );
-
-    textCtx.font =
-        font;
-
-    textCtx.textAlign =
-        "center";
-
-    textCtx.textBaseline =
-        "middle";
-
-    textCtx.fillStyle =
-        "white";
-
-    textCtx.fillText(
-        "Engram",
-        centerX,
-        centerY
-    );
-
-    // --------------------------------
-    // Find text pixels
-    // --------------------------------
-
-    const imageData =
-        textCtx.getImageData(
-            0,
-            0,
-            textCanvas.width,
-            textCanvas.height
-        );
-
-    const pixels = [];
-
-    const sampleSize =
-        Math.max(
-            1,
-            Math.round(5 * dpr)
-        );
-
-    for (
-        let y = 0;
-        y < textCanvas.height;
-        y += sampleSize
-    ) {
-
-        for (
-            let x = 0;
-            x < textCanvas.width;
-            x += sampleSize
+        if (
+            !artViewer.classList.contains(
+                "open"
+            )
         ) {
 
-            const index =
-                (
-                    y *
-                    textCanvas.width +
-                    x
-                ) * 4;
+            mouseDown = false;
 
-            if (
-                imageData.data[index + 3] >
-                128
-            ) {
+            isDragging = false;
 
-                pixels.push({
-                    x: x / dpr,
-                    y: y / dpr
-                });
+            lastDistance = null;
+            lastTouchX = null;
+            lastTouchY = null;
 
-            }
+            viewerImage.style.cursor =
+                "grab";
 
         }
 
     }
-
-    // --------------------------------
-    // Create particles
-    // --------------------------------
-
-    const particles = [];
-
-    for (
-        let i = 0;
-        i < PARTICLE_COUNT;
-        i++
-    ) {
-
-        const target =
-            pixels[
-                i % pixels.length
-            ];
-
-        particles.push({
-
-            x:
-                Math.random() * width,
-
-            y:
-                Math.random() * height,
-
-            targetX:
-                target.x,
-
-            targetY:
-                target.y,
-
-            size:
-                Math.random() * 2 + 0.5,
-
-            sizeVariation:
-                Math.random() * 0.8 + 0.6
-
-        });
-
-    }
-
-    // --------------------------------
-    // Animation state
-    // --------------------------------
-
-    let phase = "forming";
-
-    let phaseTime = 0;
-
-    let meltProgress = 0;
-
-    let fontSettleProgress = 0;
-
-    let particleContractProgress = 0;
-
-    let lastTime =
-        performance.now();
-
-    // --------------------------------
-    // Easing
-    // --------------------------------
-
-    function easeInOut(t) {
-
-        return t < 0.5
-
-            ? 2 * t * t
-
-            : 1 -
-              Math.pow(
-                  -2 * t + 2,
-                  2
-              ) / 2;
-
-    }
-
-    function easeOut(t) {
-
-        return 1 -
-            Math.pow(
-                1 - t,
-                3
-            );
-
-    }
-
-    // --------------------------------
-    // Animation
-    // --------------------------------
-
-    function animate(currentTime) {
-
-        const deltaTime =
-            Math.min(
-                currentTime - lastTime,
-                32
-            );
-
-        lastTime =
-            currentTime;
-
-        const dt =
-            deltaTime / 1000;
-
-        ctx.clearRect(
-            0,
-            0,
-            width,
-            height
-        );
-
-        // --------------------------------
-        // Move particles
-        // --------------------------------
-
-        if (
-            phase === "forming" ||
-            phase === "holding" ||
-            phase === "melting"
-        ) {
-
-            const followAmount =
-                1 -
-                Math.exp(
-                    -FOLLOW_SPEED *
-                    60 *
-                    dt
-                );
-
-            let totalDistanceSquared = 0;
-
-            for (
-                let i = 0;
-                i < particles.length;
-                i++
-            ) {
-
-                const particle =
-                    particles[i];
-
-                const dx =
-                    particle.targetX -
-                    particle.x;
-
-                const dy =
-                    particle.targetY -
-                    particle.y;
-
-                particle.x +=
-                    dx *
-                    followAmount;
-
-                particle.y +=
-                    dy *
-                    followAmount;
-
-                totalDistanceSquared +=
-                    dx * dx +
-                    dy * dy;
-
-            }
-
-            if (
-                phase === "forming"
-            ) {
-
-                const averageDistanceSquared =
-                    totalDistanceSquared /
-                    particles.length;
-
-                if (
-                    averageDistanceSquared <
-                    12 * 12
-                ) {
-
-                    phase =
-                        "holding";
-
-                    phaseTime =
-                        0;
-
-                }
-
-            }
-
-        }
-
-        // --------------------------------
-        // Hold
-        // --------------------------------
-
-        if (
-            phase === "holding"
-        ) {
-
-            phaseTime +=
-                deltaTime;
-
-            if (
-                phaseTime >=
-                HOLD_TIME
-            ) {
-
-                phase =
-                    "melting";
-
-                phaseTime =
-                    0;
-
-            }
-
-        }
-
-        // --------------------------------
-        // Melt
-        // --------------------------------
-
-        if (
-            phase === "melting"
-        ) {
-
-            meltProgress +=
-                deltaTime /
-                MELT_DURATION;
-
-            if (
-                meltProgress >=
-                FONT_APPEAR_POINT
-            ) {
-
-                meltProgress =
-                    FONT_APPEAR_POINT;
-
-                phase =
-                    "resolving";
-
-                phaseTime =
-                    0;
-
-            }
-
-        }
-
-        // --------------------------------
-        // Resolve
-        // --------------------------------
-
-        if (
-            phase === "resolving"
-        ) {
-
-            phaseTime +=
-                deltaTime;
-
-            fontSettleProgress =
-                Math.min(
-                    phaseTime /
-                    FONT_SETTLE_DURATION,
-                    1
-                );
-
-            particleContractProgress =
-                Math.min(
-                    phaseTime /
-                    PARTICLE_CONTRACT_DURATION,
-                    1
-                );
-
-            if (
-                fontSettleProgress >= 1 &&
-                particleContractProgress >= 1
-            ) {
-
-                phase =
-                    "complete";
-
-            }
-
-        }
-
-        // --------------------------------
-        // Particle expansion
-        // --------------------------------
-
-        let expansion = 0;
-
-        if (
-            phase === "melting"
-        ) {
-
-            expansion =
-                easeInOut(
-                    meltProgress /
-                    FONT_APPEAR_POINT
-                );
-
-        }
-
-        // --------------------------------
-        // Font scale
-        // --------------------------------
-
-        let fontScale = 0;
-
-        if (
-            phase === "resolving"
-        ) {
-
-            const eased =
-                easeOut(
-                    fontSettleProgress
-                );
-
-            fontScale =
-                FONT_START_SCALE -
-                (
-                    FONT_START_SCALE - 1
-                ) * eased;
-
-        }
-
-        if (
-            phase === "complete"
-        ) {
-
-            fontScale = 1;
-
-            if (
-                !navigation.classList.contains(
-                    "visible"
-                )
-            ) {
-
-                navigation.classList.add(
-                    "visible"
-                );
-
-            }
-
-        }
-
-        // --------------------------------
-        // Draw particles
-        // --------------------------------
-
-        if (
-            phase === "forming" ||
-            phase === "holding" ||
-            phase === "melting" ||
-            phase === "resolving"
-        ) {
-
-            ctx.fillStyle =
-                "white";
-
-            for (
-                let i = 0;
-                i < particles.length;
-                i++
-            ) {
-
-                const particle =
-                    particles[i];
-
-                const normalSize =
-                    particle.size;
-
-                const expandedSize =
-                    5.5 *
-                    particle.sizeVariation;
-
-                let size;
-
-                if (
-                    phase === "forming" ||
-                    phase === "holding"
-                ) {
-
-                    size =
-                        normalSize;
-
-                } else if (
-                    phase === "melting"
-                ) {
-
-                    size =
-                        normalSize +
-                        (
-                            expandedSize -
-                            normalSize
-                        ) *
-                        expansion;
-
-                } else {
-
-                    const contract =
-                        easeInOut(
-                            particleContractProgress
-                        );
-
-                    const minimumSize =
-                        0.15;
-
-                    size =
-                        expandedSize *
-                        (
-                            minimumSize +
-                            (
-                                1 -
-                                minimumSize
-                            ) *
-                            (
-                                1 -
-                                contract
-                            )
-                        );
-
-                }
-
-                ctx.beginPath();
-
-                ctx.arc(
-                    particle.x,
-                    particle.y,
-                    size,
-                    0,
-                    Math.PI * 2
-                );
-
-                ctx.fill();
-
-            }
-
-        }
-
-        // --------------------------------
-        // Draw crisp typography
-        // --------------------------------
-
-        if (
-            phase === "resolving" ||
-            phase === "complete"
-        ) {
-
-            ctx.save();
-
-            ctx.translate(
-                centerX,
-                centerY
-            );
-
-            ctx.scale(
-                fontScale,
-                fontScale
-            );
-
-            ctx.font =
-                font;
-
-            ctx.textAlign =
-                "center";
-
-            ctx.textBaseline =
-                "middle";
-
-            ctx.fillStyle =
-                "white";
-
-            ctx.fillText(
-                "Engram",
-                0,
-                0
-            );
-
-            ctx.restore();
-
-        }
-
-        requestAnimationFrame(
-            animate
-        );
-
-    }
-
-    requestAnimationFrame(
-        animate
-    );
-
-});
+);
+```
