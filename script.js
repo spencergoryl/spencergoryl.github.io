@@ -2,10 +2,22 @@ const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
 const artworkPaths = {
-    "solar-steam": "solar-steam.jpg",
-    "cloud-break": "cloud-break.jpg",
-    "clinical-perception": "clinical-perception.jpg",
-    "idle-thought": "idle-thought.jpg"
+    "solar-steam": {
+        desktop: "solar-steam-desktop.jpg",
+        mobile: "solar-steam-mobile.jpg"
+    },
+    "cloud-break": {
+        desktop: "cloud-break-desktop.jpg",
+        mobile: "cloud-break-mobile.jpg"
+    },
+    "clinical-perception": {
+        desktop: "clinical-perception-desktop.jpg",
+        mobile: "clinical-perception-mobile.jpg"
+    },
+    "idle-thought": {
+        desktop: "idle-thought-desktop.jpg",
+        mobile: "idle-thought-mobile.jpg"
+    }
 };
 
 // ================================================================
@@ -186,8 +198,9 @@ function calculateBaseScale() {
 
 function openArtwork(artName) {
 
-    const imagePath =
-        artworkPaths[artName];
+    const imagePath = isMobile
+    ? artworkPaths[artName].mobile
+    : artworkPaths[artName].desktop;
 
     if (!imagePath) {
 
