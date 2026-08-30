@@ -549,21 +549,18 @@ Brief viewer content
 
 #brief-content {
     position: absolute;
-
     left: 50%;
     top: 50%;
+    transform: translate(-50%, -50%);
 
-    transform:
-        translate(-50%, -50%);
-
-    width: min(650px, 80vw);
+    width: min(560px, 85vw);
+    max-height: 80vh;
+    overflow-y: auto;
 
     color: white;
-
-    text-align: center;
+    text-align: left;
 
     opacity: 0;
-
     visibility: hidden;
 
     transition:
@@ -571,8 +568,37 @@ Brief viewer content
         visibility 0.4s ease;
 
     z-index: 105;
-
     pointer-events: none;
+}
+
+.brief-title {
+    font-family: "Averia Serif Libre", serif;
+    font-size: 22px;
+    text-align: center;
+    margin-bottom: 36px;
+}
+
+.brief-subheading {
+    font-family: "Averia Serif Libre", serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 28px 0 12px;
+}
+
+.brief-body p {
+    font-family: "Averia Serif Libre", serif;
+    font-size: 14px;
+    line-height: 1.8;
+    letter-spacing: 0.02em;
+    color: rgba(255, 255, 255, 0.85);
+    margin: 0 0 18px;
+}
+
+.brief-body p:last-child {
+    margin-bottom: 0;
 }
 
 /* --------------------------------
