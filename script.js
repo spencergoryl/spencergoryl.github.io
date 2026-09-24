@@ -66,12 +66,9 @@ const openedArtworks = new Set();
 // PRELOAD ARTWORK
 // ================================================================
 
-Object.values(artworkPaths).forEach(path => {
-
+Object.values(artworkPaths).forEach(paths => {
     const image = new Image();
-
-    image.src = path;
-
+    image.src = isMobile ? paths.mobile : paths.desktop;
 });
 
 // ================================================================
@@ -1549,6 +1546,12 @@ document.fonts.ready.then(() => {
 
                 navigation.classList.add(
                     "visible"
+                );
+                
+                document.getElementById(
+                "site-credit"
+                ).classList.add(
+                "visible"
                 );
 
             }
