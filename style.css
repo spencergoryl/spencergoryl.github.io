@@ -652,3 +652,29 @@ Brief text
 
     letter-spacing: 0.025em;
 }
+
+/* --------------------------------
+Site Credit
+-------------------------------- */
+
+#site-credit {
+    position: fixed;
+    bottom: 16px;
+    right: 20px;
+
+    font-family: "Averia Serif Libre", serif;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+
+    color: rgba(255, 255, 255, 0.35);
+
+    opacity: 0;
+    transition: opacity 1s ease;
+
+    z-index: 10;
+    pointer-events: none;
+}
+
+#site-credit.visible {
+    opacity: 1;
+}
